@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-public class GPS extends Sensor {
+public class GPS extends DavidSensor {
 	private double latitude;
 	private double longitude;
 	private double altitude;
@@ -25,10 +25,10 @@ public class GPS extends Sensor {
 			longitude = location.getLongitude();
 			altitude = location.getAltitude();
 			
-			if(Sensor.logData) {
-				Log.d(Sensor.logDataTag, "lat: " + latitude);
-				Log.d(Sensor.logDataTag, "lon: " + longitude);
-				Log.d(Sensor.logDataTag, "alt: " + altitude);
+			if(DavidSensor.logData) {
+				Log.d(DavidSensor.logDataTag, "lat: " + latitude);
+				Log.d(DavidSensor.logDataTag, "lon: " + longitude);
+				Log.d(DavidSensor.logDataTag, "alt: " + altitude);
 			}
 			
 			if(latView != null) {
@@ -62,16 +62,12 @@ public class GPS extends Sensor {
 		
 	};
 	
-	public GPS(Context context, int mode, String systemService) {
+	public GPS(Context context, ManagerEnum mode, String systemService) {
 		super(context, mode, systemService);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public GPS(Context context, int mode, String systemService, boolean debug) {
-		super(context, mode, systemService, debug);
-	}
-
-	public GPS(Context context, int mode, String systemService, TextView lat, TextView lon, TextView alt) {
+	public GPS(Context context, ManagerEnum mode, String systemService, TextView lat, TextView lon, TextView alt) {
 		super(context, mode, systemService);
 		this.latView = lat;
 		this.lonView = lon;

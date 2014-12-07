@@ -31,9 +31,11 @@ import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.fixus.td.sensors.Accelerometer;
 import com.fixus.td.sensors.GPS;
+import com.fixus.td.sensors.ManagerEnum;
 import com.fixus.td.sensors.Orientation;
-import com.fixus.td.sensors.Sensor;
+import com.fixus.td.sensors.DavidSensor;
 import com.fixus.towerdefense.analyze.FrameAnalyzer;
 
 public class StarterActivity extends Activity implements CvCameraViewListener {
@@ -113,6 +115,7 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 		pitchValue = (TextView) findViewById(R.id.pitchLabel);
 		rollValue = (TextView) findViewById(R.id.rollLabel);
 		headingValue = (TextView) findViewById(R.id.headingLabel);
+		
 
 //		Sensor.logData = false;
 //		Orientation orientationSensor = new Orientation(this, Sensor.ORIENTATION_MODE, SENSOR_SERVICE, headingValue, pitchValue, rollValue);
@@ -122,8 +125,10 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 		lonValue = (TextView) findViewById(R.id.lon_label);
 		altValue = (TextView) findViewById(R.id.alt_label);
 		
-		GPS gpsSensor = new GPS(this, Sensor.GPS_MODE, LOCATION_SERVICE, latValue, lonValue, altValue);
-		gpsSensor.run();
+		
+		//GPS gpsSensor = new GPS(this, ManagerEnum.GPS_MODE, LOCATION_SERVICE, latValue, lonValue, altValue);
+		//gpsSensor.run();
+		Accelerometer test = new Accelerometer(this,pitchValue,rollValue,headingValue);
 		
 		openCvCameraView.setOnTouchListener(new OnTouchListener() {
 						

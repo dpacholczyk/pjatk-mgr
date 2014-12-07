@@ -1,9 +1,6 @@
 package com.fixus.td.sensors;
 
-import java.util.List;
-
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,7 +20,7 @@ import android.widget.TextView;
  * opcje 1 bo to szybsze do implementacji
  *
  */
-public class Orientation extends com.fixus.td.sensors.Sensor {
+public class Orientation extends com.fixus.td.sensors.DavidSensor {
 	private int orientationSensor;
 	private float headingAngle;
 	private float pitchAngle;
@@ -33,10 +30,11 @@ public class Orientation extends com.fixus.td.sensors.Sensor {
 	private TextView pitchView = null;
 	private TextView rollView = null;
 	
-	private static boolean display;
+	//private static boolean display;
 	
 	final SensorEventListener sensorEventListener = new SensorEventListener() {
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			if(event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
@@ -44,10 +42,10 @@ public class Orientation extends com.fixus.td.sensors.Sensor {
 				pitchAngle = event.values[1];
 				rollAngle = event.values[2];
 				
-				if(com.fixus.td.sensors.Sensor.logData) {
-					Log.d(com.fixus.td.sensors.Sensor.logDataTag, "Heading: " + String.valueOf(headingAngle));
-					Log.d(com.fixus.td.sensors.Sensor.logDataTag, "Pitch: " + String.valueOf(pitchAngle));
-					Log.d(com.fixus.td.sensors.Sensor.logDataTag, "Roll: " + String.valueOf(rollAngle));
+				if(com.fixus.td.sensors.DavidSensor.logData) {
+					Log.d(com.fixus.td.sensors.DavidSensor.logDataTag, "Heading: " + String.valueOf(headingAngle));
+					Log.d(com.fixus.td.sensors.DavidSensor.logDataTag, "Pitch: " + String.valueOf(pitchAngle));
+					Log.d(com.fixus.td.sensors.DavidSensor.logDataTag, "Roll: " + String.valueOf(rollAngle));
 				}
 				
 				if(headingView != null) {
@@ -69,15 +67,11 @@ public class Orientation extends com.fixus.td.sensors.Sensor {
 		}
 	};
 	
-	public Orientation(Context context, int mode, String systemService) {
+	public Orientation(Context context, ManagerEnum mode, String systemService) {
 		super(context, mode, systemService);
 	}
 	
-	public Orientation(Context context, int mode, String systemService, boolean debug) {
-		super(context, mode, systemService, debug);
-	}
-	
-	public Orientation(Context context, int mode, String systemService, TextView hv, TextView pv, TextView rv) {
+	public Orientation(Context context, ManagerEnum mode, String systemService, TextView hv, TextView pv, TextView rv) {
 		super(context, mode, systemService);
 		this.headingView = hv;
 		this.pitchView = pv;
@@ -89,6 +83,7 @@ public class Orientation extends com.fixus.td.sensors.Sensor {
 	 * SensorManager.SENSOR_DELAY_NORMAL - mo¿na ustawiæ kilka trybów. Szybsze (moco¿erne) lub wolniejsze
 	 * Powinien byæ switch który tym steruje
 	 */
+	@SuppressWarnings("deprecation")
 	public void run() {
 		this.orientationSensor = Sensor.TYPE_ORIENTATION;
 		this.sensorManager.registerListener(sensorEventListener, this.sensorManager.getDefaultSensor(orientationSensor), SensorManager.SENSOR_DELAY_NORMAL);
