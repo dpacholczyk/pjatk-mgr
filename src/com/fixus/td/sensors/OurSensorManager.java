@@ -1,13 +1,12 @@
 package com.fixus.td.sensors;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.widget.TextView;
 
-public abstract class OurSensorManager extends Activity implements SensorEventListener{
+public abstract class OurSensorManager implements SensorEventListener{
 	private SensorManager sensorManager;
 	private Sensor sensor;
 	private int sensorType;
@@ -31,15 +30,13 @@ public abstract class OurSensorManager extends Activity implements SensorEventLi
 	    sensorManager.registerListener(this, sensor , SensorManager.SENSOR_DELAY_NORMAL);
 	}
 	
-	protected void onPause() {
-	    super.onPause();
+	public void onPause() {
 		 // W trakcie wstrzymania aplikacji zatrzymuje pobieranie aktualizowanych danych w celu
 		 // zaoszczêdzenia energii
 	    sensorManager.unregisterListener(this);
 	}
-
-	protected void onResume() {
-	    super.onResume();
+	
+	public void onResume() {
 	    //Po przywrocenie wznawiamy aktualizaowanie danych
 	    sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
 	}	

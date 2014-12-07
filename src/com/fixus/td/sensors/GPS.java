@@ -3,15 +3,18 @@ package com.fixus.td.sensors;
 import com.fixus.td.popup.SettingsPopUp;
 
 import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 
-public class GPS extends Activity implements LocationListener {
+public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
 	private final static String POP_MSG = "GPS is not enabled. Do you want open settings menu?";
 	// The minimum distance to change Updates in meters
@@ -122,16 +125,18 @@ public class GPS extends Activity implements LocationListener {
 		showSettingsPopUp();
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
+	public void onResume() {
 		getLocation();//reqeustForUpdate();
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
+	public void onPause() {
 		locationManager.removeUpdates(this);
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
