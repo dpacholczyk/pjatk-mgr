@@ -10,12 +10,82 @@
     tools:context="com.fixus.towerdefense.StarterActivity" >
 
     <org.opencv.android.JavaCameraView
+        android:id="@+id/javaCamera"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone"
-        android:id="@+id/StarterActivitiyCameraView"
         android:clickable="true"
-        opencv:show_fps="true"
-        opencv:camera_id="any" />
+        android:visibility="gone"
+        opencv:camera_id="any"
+        opencv:show_fps="true" />
 
+    <TextView
+        android:id="@+id/headingLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="19dp"
+        android:textColor="@color/debug_color"
+        android:text="@string/heading" />
+
+    <TextView
+        android:id="@+id/pitchLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/headingLabel"
+        android:textColor="@color/debug_color"
+        android:text="@string/pitch" />
+
+    <TextView
+        android:id="@+id/rollLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pitchLabel"
+        android:textColor="@color/debug_color"
+        android:text="@string/roll" />
+    
+    <TextView
+        android:id="@+id/lat_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/break1"
+        android:textColor="@color/debug_color" />
+
+    <TextView
+        android:id="@+id/lon_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lat_label"
+        android:textColor="@color/debug_color" />
+    
+    <TextView
+        android:id="@+id/alt_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/alt_label"
+        android:textColor="@color/debug_color" />
+    
+    <ImageView
+        android:id="@+id/crossaim"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/cross" />
+
+    <TextView
+        android:id="@+id/break1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/lat_label"
+        android:layout_below="@+id/rollLabel"
+        android:text="@string/gps_break"
+        android:textColor="@color/debug_color" />
+
+    <TextView
+        android:id="@+id/break2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/headingLabel"
+        android:layout_alignTop="@+id/alt_label"
+        android:text="@string/orientation_break"
+        android:textColor="@color/debug_color" />
+    
 </RelativeLayout>

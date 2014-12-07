@@ -10,27 +10,31 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
-import com.fixus.towerdefense.analyze.FrameAnalyzer;
-
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
+import android.widget.TextView;
+
+import com.fixus.td.sensors.GPS;
+import com.fixus.td.sensors.Orientation;
+import com.fixus.td.sensors.Sensor;
+import com.fixus.towerdefense.analyze.FrameAnalyzer;
 
 public class StarterActivity extends Activity implements CvCameraViewListener {
 
@@ -38,6 +42,13 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 	private CascadeClassifier cascadeClassifier;
 	private Mat grayscaleImage;
 	private int absoluteObjectSize;
+	
+	public TextView headingValue;
+	public TextView pitchValue;
+	public TextView rollValue;
+	public TextView latValue;
+	public TextView lonValue;
+	public TextView altValue;
 
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		@Override
@@ -86,21 +97,42 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+//		setContentView(R.layout.activity_starter);
+		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		openCvCameraView = new JavaCameraView(this, -1);
-		openCvCameraView.enableFpsMeter();
-		setContentView(openCvCameraView);
+//		openCvCameraView = new JavaCameraView(this, -1);
+//		openCvCameraView.enableFpsMeter();
+//		setContentView(openCvCameraView);
+		
+		setContentView(R.layout.activity_starter);
+		openCvCameraView = (CameraBridgeViewBase) findViewById(R.id.javaCamera);
+		openCvCameraView.setVisibility(SurfaceView.VISIBLE);
 		openCvCameraView.setCvCameraViewListener(this);
-		openCvCameraView.setOnTouchListener(new OnTouchListener() {
+		
+		pitchValue = (TextView) findViewById(R.id.pitchLabel);
+		rollValue = (TextView) findViewById(R.id.rollLabel);
+		headingValue = (TextView) findViewById(R.id.headingLabel);
 
+//		Sensor.logData = false;
+//		Orientation orientationSensor = new Orientation(this, Sensor.ORIENTATION_MODE, SENSOR_SERVICE, headingValue, pitchValue, rollValue);
+//		orientationSensor.run();
+
+		latValue = (TextView) findViewById(R.id.lat_label);
+		lonValue = (TextView) findViewById(R.id.lon_label);
+		altValue = (TextView) findViewById(R.id.alt_label);
+		
+		GPS gpsSensor = new GPS(this, Sensor.GPS_MODE, LOCATION_SERVICE, latValue, lonValue, altValue);
+		gpsSensor.run();
+		
+		openCvCameraView.setOnTouchListener(new OnTouchListener() {
+						
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				float x = event.getX();
 				float y = event.getY();
-				Log.d("TD", "x: " + x);
-				Log.d("TD", "y: " + y);
+//				Log.d("TD", "x: " + x);
+//				Log.d("TD", "y: " + y);
 
 				// corners
 				// order: top-left, top-right, bottom-right, bottom-left
@@ -159,11 +191,11 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 
 		Rect[] dataArray = objects.toArray();
 		for (int i = 0; i < dataArray.length; i++) {
-			Log.d("POSITION", "point 1: " + dataArray[i].tl());
-			Log.d("POSITION", "point 2: " + dataArray[i].br());
+//			Log.d("POSITION", "point 1: " + dataArray[i].tl());
+//			Log.d("POSITION", "point 2: " + dataArray[i].br());
 
-			Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
-					new Scalar(0, 255, 0, 255), 3);
+//			Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
+//					new Scalar(0, 255, 0, 255), 3);
 		}
 
 		return aInputFrame;
@@ -174,5 +206,12 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 		super.onResume();
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this,
 				mLoaderCallback);
+		
+		
+	}
+	
+	@Override
+	public void onPause() {
+		
 	}
 }

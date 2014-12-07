@@ -4,5 +4,10 @@
     <string name="app_name">TowerDefense</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="pitch">pitch</string>
+    <string name="roll">roll</string>
+    <string name="heading">heading</string>
+    <string name="gps_break">GPS</string>
+    <string name="orientation_break">ORIENTATION</string>
 
 </resources>
