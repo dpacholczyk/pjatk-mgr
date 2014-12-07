@@ -7,21 +7,21 @@ import java.io.InputStream;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
-import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -32,7 +32,6 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.fixus.td.sensors.GPS;
-import com.fixus.td.sensors.Orientation;
 import com.fixus.td.sensors.Sensor;
 import com.fixus.towerdefense.analyze.FrameAnalyzer;
 
@@ -68,11 +67,9 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 
 		try {
 			// Copy the resource into a temp file so OpenCV can load it
-			InputStream is = getResources().openRawResource(
-					R.raw.lbpcascade_frontalface);
+			InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
 			File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
-			File mCascadeFile = new File(cascadeDir,
-					"lbpcascade_frontalface.xml");
+			File mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
 			FileOutputStream os = new FileOutputStream(mCascadeFile);
 
 			byte[] buffer = new byte[4096];
@@ -194,8 +191,8 @@ public class StarterActivity extends Activity implements CvCameraViewListener {
 //			Log.d("POSITION", "point 1: " + dataArray[i].tl());
 //			Log.d("POSITION", "point 2: " + dataArray[i].br());
 
-//			Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
-//					new Scalar(0, 255, 0, 255), 3);
+			Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
+					new Scalar(0, 255, 0, 255), 3);
 		}
 
 		return aInputFrame;
