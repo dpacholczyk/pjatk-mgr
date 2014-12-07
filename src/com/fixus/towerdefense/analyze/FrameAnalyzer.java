@@ -6,8 +6,11 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 public class FrameAnalyzer {
-	public static Point p1;
-	public static Point p2;
+	public static Point tl;
+	public static Point tr;
+	public static Point bl;
+	public static Point br;
+	public static Mat frame;
 	
 	public static Mat analyzeFrame(Mat aInputFrame) {
 
@@ -34,13 +37,11 @@ public class FrameAnalyzer {
 //        	
 //        	Core.rectangle(aInputFrame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
 //        }
-		Point p1 = new Point(0, 0);
-		Point p2 = new Point(100, 100);
-		
-		FrameAnalyzer.p1 = p1;
-		FrameAnalyzer.p2 = p2;
-		
-    	Core.rectangle(aInputFrame, p1, p2, new Scalar(0, 255, 0, 255), 3); 
+//		Point p1 = new Point(0, 0);
+//		Point p2 = new Point(100, 100);
+//		
+//		FrameAnalyzer.p1 = p1;
+//		FrameAnalyzer.p2 = p2;
  
         return aInputFrame;
 	}
