@@ -13,6 +13,15 @@ public abstract class OurSensorManager implements SensorEventListener{
 	protected TextView[] texts;
 	protected Float lastX,lastY,lastZ;
 	
+	public static boolean debug = false;
+	public static boolean printToField = true;
+	public static final String SENSOR_TAG = "TD_SENSOR";
+	
+	public OurSensorManager(Context context, int sensorType) {
+		this.sensorType = sensorType;
+		startMe(context);
+	}
+	
 	public OurSensorManager(Context context,int sensorType,TextView... texts){
 		this.sensorType = sensorType;
 		this.texts = texts;

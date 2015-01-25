@@ -87,5 +87,14 @@
         android:layout_alignTop="@+id/alt_label"
         android:text="@string/orientation_break"
         android:textColor="@color/debug_color" />
+
+    <Button
+        android:id="@+id/snap_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/lon_label"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="21dp"
+        android:text="Button" />
     
 </RelativeLayout>

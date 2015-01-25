@@ -1,8 +1,5 @@
 package com.fixus.td.sensors;
 
-import com.fixus.td.popup.SettingsPopUp;
-
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +10,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+
+import com.fixus.td.popup.SettingsPopUp;
 
 public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
