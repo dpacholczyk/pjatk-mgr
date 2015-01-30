@@ -71,14 +71,14 @@ public class TestRenderer extends RajawaliRenderer {
 		m3DObject.setPosition(1, 1, -10);
 //		getCurrentScene().addLight(mLight);
 		
-		Cube mCube = new Cube(1);
-		    Material diffuse = new Material();
-		    diffuse.enableLighting(true);
-		    diffuse.setDiffuseMethod(new DiffuseMethod.Lambert());
-		    mCube.setColor(Color.BLUE);
-		    mCube.setMaterial(diffuse);
-		    mCube.setPosition(-1, 1, 1);
-		    getCurrentScene().addChild(mCube);
+//		Cube mCube = new Cube(1);
+//		    Material diffuse = new Material();
+//		    diffuse.enableLighting(true);
+//		    diffuse.setDiffuseMethod(new DiffuseMethod.Lambert());
+//		    mCube.setColor(Color.BLUE);
+//		    mCube.setMaterial(diffuse);
+//		    mCube.setPosition(-1, 1, 1);
+//		    getCurrentScene().addChild(mCube);
 
 		
 		
