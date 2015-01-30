@@ -19,6 +19,8 @@ import android.util.Log;
 import com.fixus.towerdefense.R;
 
 public class TestRenderer extends RajawaliRenderer {
+	
+	
 	private DirectionalLight mLight;
 	private Object3D sphere;
 	private Object3D m3DObject;
@@ -67,18 +69,18 @@ public class TestRenderer extends RajawaliRenderer {
 		}
 
 		m3DObject = objParser.getParsedObject();
-		m3DObject.setMaterial(material);
+		//m3DObject.setMaterial(material);
 		m3DObject.setPosition(1, 1, -10);
 //		getCurrentScene().addLight(mLight);
 		
-		Cube mCube = new Cube(1);
+		/*Cube mCube = new Cube(1);
 		    Material diffuse = new Material();
 		    diffuse.enableLighting(true);
 		    diffuse.setDiffuseMethod(new DiffuseMethod.Lambert());
 		    mCube.setColor(Color.BLUE);
 		    mCube.setMaterial(diffuse);
 		    mCube.setPosition(-1, 1, 1);
-		    getCurrentScene().addChild(mCube);
+		    getCurrentScene().addChild(mCube);*/
 
 		
 		
@@ -113,9 +115,15 @@ public class TestRenderer extends RajawaliRenderer {
 		if (m3DObject != null)
 			m3DObject.setPosition(x, y, z);
 	}
+	
+	public void set3DObjectRotate(double rotX, double rotY, double rotZ) {
+		if (m3DObject != null){
+			m3DObject.setRotation(rotX, rotY, rotZ);
+		}
+			
+	}
 
 	public Vector3 get3DObjectPosition() {
-
 		return m3DObject.getPosition();
 	}
 
