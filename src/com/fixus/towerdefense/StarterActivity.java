@@ -52,6 +52,7 @@ import com.fixus.towerdefense.tools.ObjectPosition;
 import com.fixus.towerdefense.tools.PersonPosition;
 import com.fixus.towerdefense.tools.TestRenderer;
 
+
 public class StarterActivity extends RajawaliActivity implements CvCameraViewListener2,OnTouchListener {
 
 	private CameraBridgeViewBase openCvCameraView;
@@ -65,7 +66,6 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 	
 	
 	private Accelerometer myAccelSensor;
-	
 	
 	public GPS gps;
 	public TextView headingValue;
@@ -153,7 +153,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		mRenderer.setSurfaceView(mSurfaceView);
 		super.setRenderer(mRenderer);
 		
-		mRenderer.setCameraPosition(0, 0, 8.2f);
+		mRenderer.setCameraPosition(-5, 5, 75f);
 	}
 
 	@Override
@@ -161,7 +161,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		mRgba = new Mat(height, width, CvType.CV_8UC4);
 
 		// The faces will be a 20% of the height of the screen
-		absoluteObjectSize = (int) (height * 0.4);
+		//absoluteObjectSize = (int) (height * 0.4);
 	}
 
 	@Override
@@ -176,19 +176,23 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		DecimalFormat df = new DecimalFormat("#.##");
 		mRgba = inputFrame.rgba();
-		
 		/*
 		 * Do wyswietlanie info z accelerometru
 		 * 
-		 * Core.putText(mRgba," x: " + myAccelSensor.getLastX()
-				+ " y: " + myAccelSensor.getLastY() + " z: " + myAccelSensor.getLastZ() , new Point(0, 30),
-				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);*/
+		 */
+		Core.putText(mRgba,"x: "+ myAccelSensor.getLastX().intValue()
+				+ " y: " + myAccelSensor.getLastY().intValue() + " z: " + myAccelSensor.getLastZ().intValue() , new Point(0, 30),
+				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);
+		
+		//kolko :)
+		//Core.ellipse(mRgba, new RotatedRect(new Point(10, 10),new Size(30, 30),15), new Scalar(255, 255, 0), 5);
+	
 		
 		if (mRenderer.isReady()){
-			setRotation(myAccelSensor.getLastX(),myAccelSensor.getLastY(),myAccelSensor.getLastZ());
+			//Log.d("3d", mRenderer.get3DObjectPosition().toString());
+			setRotation(myAccelSensor.getLastX().intValue(),myAccelSensor.getLastY().intValue(),myAccelSensor.getLastZ().intValue());
 		}
-			
-		
+
 		return mRgba;
 	}
 
@@ -222,8 +226,30 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		return false;
 	}
 	
+	private double nX,nY,nZ;
 	private void setRotation(double rotX, double rotY, double rotZ){
-		mRenderer.set3DObjectRotate(rotX, -rotY, rotZ);
+		nX = 0;
+		nY += getRotValue(rotY);
+		nZ += getRotValue(rotZ);
+		
+		
+		Log.d("rotation", "X pos: " + nZ);
+		Log.d("rotation", "Y pos: " + nY);
+
+		mRenderer.rotate3DObject(nZ, nY, nX);
+		//mRenderer.rotateCamera(nZ, nY, nX);
+	}
+	
+	private double getRotValue(double x){
+		int rValue = 0;
+		
+		if(x < -1){
+			rValue += 1;
+		}else if(x > 1){
+			rValue += -1;
+		}
+		
+		return rValue;
 	}
 
 }
