@@ -3,10 +3,12 @@ package com.fixus.towerdefense;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -18,12 +20,14 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Range;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
 import rajawali.RajawaliActivity;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -48,16 +52,20 @@ import com.fixus.towerdefense.tools.ObjectPosition;
 import com.fixus.towerdefense.tools.PersonPosition;
 import com.fixus.towerdefense.tools.TestRenderer;
 
-public class StarterActivity extends RajawaliActivity implements CvCameraViewListener {
+public class StarterActivity extends RajawaliActivity implements CvCameraViewListener2,OnTouchListener {
 
 	private CameraBridgeViewBase openCvCameraView;
 	private CascadeClassifier cascadeClassifier;
-	private Mat grayscaleImage;
+	private Mat mRgba;
 	private int absoluteObjectSize;
 	private PersonPosition personPosition = null;
 	private ObjectPosition objectPosition = null;
 	
 	public final Context context = this;
+	
+	
+	private Accelerometer myAccelSensor;
+	
 	
 	public GPS gps;
 	public TextView headingValue;
@@ -125,51 +133,22 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		setContentView(R.layout.activity_starter);
-		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
-//		setContentView(R.layout.activity_starter);
-//		openCvCameraView = (CameraBridgeViewBase) findViewById(R.id.javaCamera);
-////		openCvCameraView.setVisibility(SurfaceView.VISIBLE);
-//		openCvCameraView.setCvCameraViewListener(this);
-		
-		
-//		pitchValue = (TextView) findViewById(R.id.pitchLabel);
-//		rollValue = (TextView) findViewById(R.id.rollLabel);
-//		headingValue = (TextView) findViewById(R.id.headingLabel);
-//		
-//		Button snapButton = (Button) findViewById(R.id.snap_button);
-//		snapButton.setOnClickListener(snapButtonListener);
-//
-//		latValue = (TextView) findViewById(R.id.lat_label);
-//		lonValue = (TextView) findViewById(R.id.lon_label);
-//		altValue = (TextView) findViewById(R.id.alt_label);
-//		OurSensorManager test = new Orientation(this,pitchValue,rollValue,headingValue);
-//		
-//		//GPS gpsSensor = new GPS(this, ManagerEnum.GPS_MODE, LOCATION_SERVICE, latValue, lonValue, altValue);
-//		//gpsSensor.run();
-//		this.gps = new GPS(this);
-//		if(this.gps.canGetLocation()){
-//			latValue.setText("" + this.gps.getLatitude()); // returns latitude
-//			lonValue.setText("" + this.gps.getLongitude()); // returns longitude
-//		} else{
-//			this.gps.showSettingsPopUp();
-//		}
 		
 		OurSensorManager.debug = false;
 		OurSensorManager.printToField = false;
 
+		myAccelSensor = new Accelerometer(this);
+		
+		
 		openCvCameraView = (CameraBridgeViewBase) new JavaCameraView(this, -1);
 		openCvCameraView.setCvCameraViewListener(this);
-
-//		Accelerometer a = new Accelerometer(this);
-//
-//		
+		//openCvCameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT)		
+		
 		mLayout.addView(openCvCameraView);
+		
 		mSurfaceView.setZOrderMediaOverlay(true);
 		setGLBackgroundTransparent(true);
-				
 		mRenderer = new TestRenderer(this);
 		mRenderer.setSurfaceView(mSurfaceView);
 		super.setRenderer(mRenderer);
@@ -179,7 +158,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		grayscaleImage = new Mat(height, width, CvType.CV_8UC4);
+		mRgba = new Mat(height, width, CvType.CV_8UC4);
 
 		// The faces will be a 20% of the height of the screen
 		absoluteObjectSize = (int) (height * 0.4);
@@ -187,105 +166,64 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 
 	@Override
 	public void onCameraViewStopped() {
+		if (mRgba != null){
+			mRgba.release();
+		}
+		mRgba = null;
 	}
 
-	public static int test = 1;
-	public static float distance = (float)4.2;
-	public static float x = (float)1.0;
-	@Override
-	public Mat onCameraFrame(Mat aInputFrame) {
+	
+	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+		DecimalFormat df = new DecimalFormat("#.##");
+		mRgba = inputFrame.rgba();
 		
-		// return FrameAnalyzer.analyzeFrame(aInputFrame);
-		// Create a grayscale image
-//		Imgproc.cvtColor(aInputFrame, grayscaleImage, Imgproc.COLOR_RGBA2RGB);
-//
-//		MatOfRect objects = new MatOfRect();
-//
-//		// Use the classifier to detect faces
-//		if (cascadeClassifier != null) {
-//			cascadeClassifier.detectMultiScale(grayscaleImage, objects, 1.1, 3, 2, 
-//					new Size(absoluteObjectSize, absoluteObjectSize), new Size());
-//		}
-//
-//		Rect[] dataArray = objects.toArray();
-//		for (int i = 0; i < dataArray.length; i++) {
-//			Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
-//					new Scalar(0, 255, 0, 255), 3);			
-//
-//			FrameAnalyzer.tl = dataArray[i].tl();
-//			FrameAnalyzer.br = dataArray[i].br();			
-//			FrameAnalyzer.tr = new Point(dataArray[i].br().x, dataArray[i].tl().y);
-//			FrameAnalyzer.bl = new Point(dataArray[i].tl().x, dataArray[i].br().y);
-//			FrameAnalyzer.frame = aInputFrame;
-//			
-//			
-//		}
-
+		/*
+		 * Do wyswietlanie info z accelerometru
+		 * 
+		 * Core.putText(mRgba," x: " + myAccelSensor.getLastX()
+				+ " y: " + myAccelSensor.getLastY() + " z: " + myAccelSensor.getLastZ() , new Point(0, 30),
+				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);*/
 		
+		if (mRenderer.isReady()){
+			setRotation(myAccelSensor.getLastX()*5,myAccelSensor.getLastY()*5,myAccelSensor.getLastZ()*5);
+		}
+			
 		
-		return aInputFrame;
+		return mRgba;
 	}
 
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public void onResume() {
 		super.onResume();
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this,
 				mLoaderCallback);
-		
-		
+		openCvCameraView.setOnTouchListener(this);
+		myAccelSensor.onResume();
 	}
 	
 	@Override
 	public void onPause() {
-		
+		super.onPause();
+		if (openCvCameraView != null)
+			openCvCameraView.disableView();
+		myAccelSensor.onPause();
 	}
 	
-	// onclick listener z onclick
-//	openCvCameraView.setOnTouchListener(new OnTouchListener() {
-//		
-//		@Override
-//		public boolean onTouch(View v, MotionEvent event) {
-//			float x = event.getX();
-//			float y = event.getY();
-////			Log.d("TD", "x: " + x);
-////			Log.d("TD", "y: " + y);
-//
-//			// corners
-//			// order: top-left, top-right, bottom-right, bottom-left
-//			Point tl = FrameAnalyzer.tl;
-//			Point br = FrameAnalyzer.br;
-//			Point tr = FrameAnalyzer.tr;
-//			Point bl = FrameAnalyzer.bl;
-//
-//			Point taped = new Point(x, y);
-//
-//			// proste spradzenie czy punkt w prostok¹cie
-//			Log.d("TD", "tap x: " + x);
-//			Log.d("TD", "tap y: " + y);
-//			
-//			Log.d("TD", "dane punktow");
-//			Log.d("TD", "tl: " + tl.x + " | " + tl.y);
-//			Log.d("TD", "tr: " + tr.x + " | " + tr.y);
-//			Log.d("TD", "bl: " + bl.x + " | " + bl.y);
-//			Log.d("TD", "br: " + br.x + " | " + br.y);
-//			if (taped.x >= tl.x && taped.x <= tr.x && taped.y <= bl.y
-//					&& taped.y >= tl.y) {
-//				
-//				ImageView iv = (ImageView) findViewById(R.id.crossaim);
-//				Mat dst = new Mat();
-//				Mat img = FrameAnalyzer.frame;
-//				Imgproc.cvtColor(img, dst, Imgproc.COLOR_BGR2RGBA , 4);
-//				Mat dst2 = new Mat(dst, new Range(0, dst.rows()/2), new Range(0, dst.cols()/2));
-//				Bitmap bitmap = Bitmap.createBitmap(dst2.cols(), dst2.rows(),
-//				Bitmap.Config.ARGB_8888);
-//				Utils.matToBitmap(dst2, bitmap);
-//				iv.setImageBitmap(bitmap);
-//				
-//			} else {
-//				Log.d("TD", "poza prostokatem");
-//			}
-//
-//			return true;
-//		}
-//	});
+	public void onDestroy() {
+		super.onDestroy();
+		if (openCvCameraView != null)
+			openCvCameraView.disableView();
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	private void setRotation(double rotX, double rotY, double rotZ){
+		mRenderer.set3DObjectRotate(rotX, -rotY, rotZ);
+	}
+
 }
