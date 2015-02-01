@@ -33,10 +33,6 @@ public class Accelerometer extends OurSensorManager{
 	    	setLastY(event.values[1]);
 	    	setLastZ(event.values[2]);
 	    	
-	    	Log.d("debuggowanie", getLastX().toString());
-	    	Log.d("debuggowanie", getLastY().toString());
-	    	Log.d("debuggowanie", getLastZ().toString());
-	    	
 	    	if(debug) {
 		    	Log.d(SENSOR_TAG, "(Accelerometer) Heading: " + event.values[0]);
 		    	Log.d(SENSOR_TAG, "(Accelerometer) Pitch: " + event.values[1]);

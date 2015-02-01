@@ -5,8 +5,6 @@ import rajawali.Object3D;
 import rajawali.lights.DirectionalLight;
 import rajawali.materials.Material;
 import rajawali.materials.methods.DiffuseMethod;
-import rajawali.materials.textures.ATexture.TextureException;
-import rajawali.materials.textures.Texture;
 import rajawali.math.vector.Vector3;
 import rajawali.parser.LoaderOBJ;
 import rajawali.parser.ParsingException;
@@ -20,7 +18,6 @@ import com.fixus.towerdefense.R;
 
 public class TestRenderer extends RajawaliRenderer {
 	private DirectionalLight mLight;
-	private Object3D sphere;
 	private Object3D m3DObject;
 	private static final boolean DEBUG = true;
 	private static final String TAG = "OpenGLRenderer";
@@ -37,38 +34,20 @@ public class TestRenderer extends RajawaliRenderer {
 		mLight = new DirectionalLight(5f, 0.2f, -1.0f);
 		mLight.setColor(1.0f, 10.0f, 10.0f);
 		mLight.setPower(1);
-		
-		Material material = new Material();
-		try {
-			material.addTexture(new Texture("earth", R.drawable.monkey_tex));
-			material.enableLighting(true);
-			material.setDiffuseMethod(new DiffuseMethod.Lambert());
-		} catch (TextureException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-//		try {
-//			sphere = new Sphere(1, 48, 48);
-//			sphere.setMaterial(material);		
-//			getCurrentScene().addLight(mLight);
-//			getCurrentScene().addChild(sphere);
-//		} catch (TextureException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
 		LoaderOBJ objParser = new LoaderOBJ(mContext.getResources(), mTextureManager, R.raw.f16);
 		
 		try {
 			objParser.parse();
 		} catch (ParsingException e) {
-
 			e.printStackTrace();
-
 		}
 
 		m3DObject = objParser.getParsedObject();
-		m3DObject.setMaterial(material);
-		m3DObject.setPosition(1, 1, -10);
+		m3DObject.setScale(3.0);
+		//m3DObject.setMaterial(material);
+		//m3DObject.setPosition(x, y, z);
+		m3DObject.setPosition(0, 0, 0);
 //		getCurrentScene().addLight(mLight);
 		
 		Cube mCube = new Cube(1);
@@ -101,26 +80,48 @@ public class TestRenderer extends RajawaliRenderer {
         // ta linia automatycznie rotuje sfere
 //        sphere.setRotY(sphere.getRotY() + 1);
     }
-    
-//    @Override
-//	public void onDrawFrame(GL10 glUnused) {
-//		super.onDrawFrame(glUnused);
-//
-//	}
 
 	public void set3DObjectPosition(double x, double y, double z) {
-
-		if (m3DObject != null)
+		if (m3DObject != null){
 			m3DObject.setPosition(x, y, z);
+		}		
 	}
-
+	
+	public void set3DObjectPosition(Vector3 newPosition) {
+		if (m3DObject != null){
+			m3DObject.setPosition(newPosition);
+		}		
+	}
+	
+	public void set3DObjectRotate(double rotX, double rotY, double rotZ) {
+		if (m3DObject != null){
+			m3DObject.setRotation(rotX, rotY, rotZ);
+		}
+			
+	}
+	
+	public void doAnimation(){
+		//m3DObject.rotateAround(new Vector3(1, 0, 0), 30, true);
+	}
+	
+	public void rotateCamer(double rotX, double rotY, double rotZ) {
+		getCurrentCamera().setRotation(rotX, rotY, rotZ);
+	}
+	
+	public void rotate3DObject(double rotX, double rotY, double rotZ) {
+		m3DObject.setRotation(
+				rotX,	
+				rotY,	
+				rotZ	
+		);
+	}
+	
 	public Vector3 get3DObjectPosition() {
 
 		return m3DObject.getPosition();
 	}
 
 	public void setCameraPosition(double x, double y, double z) {
-
 		getCurrentCamera().setX(x);
 		getCurrentCamera().setY(y);
 		getCurrentCamera().setZ(z);

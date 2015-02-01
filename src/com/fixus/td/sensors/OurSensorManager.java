@@ -7,16 +7,16 @@ import android.hardware.SensorManager;
 import android.widget.TextView;
 
 public abstract class OurSensorManager implements SensorEventListener{
+	public static boolean debug = false;
+	public static boolean printToField = true;
+	public static final String SENSOR_TAG = "TD_SENSOR";
+	
 	private SensorManager sensorManager;
 	private Sensor sensor;
 	private int sensorType;
 	protected TextView[] texts;
 	protected Float lastX,lastY,lastZ;
-	
-	public static boolean debug = false;
-	public static boolean printToField = true;
-	public static final String SENSOR_TAG = "TD_SENSOR";
-	
+
 	public OurSensorManager(Context context, int sensorType) {
 		this.sensorType = sensorType;
 		startMe(context);
