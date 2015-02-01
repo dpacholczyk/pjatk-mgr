@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 
 import com.fixus.td.popup.SettingsPopUp;
 
@@ -26,6 +27,7 @@ public class GPS extends Service implements LocationListener {
 	 */
 	
 	private final Context mContext;
+	private final Criteria criteria;
 
 	private boolean canGetLocation;
 	private String myBestProvider;
@@ -36,6 +38,7 @@ public class GPS extends Service implements LocationListener {
 
 	public GPS(Context context) {
 		this.mContext = context;
+		this.criteria = new Criteria();
 		init();
 	}
 
@@ -48,19 +51,33 @@ public class GPS extends Service implements LocationListener {
 				|| locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 		//pobieramy pierwsza lokalizacje(a dokladnie wysylamy request, w celu jej uzyskania)
 		getLocation();
+		
+		criteria.setAccuracy(Criteria.ACCURACY_FINE);
+	    criteria.setPowerRequirement(Criteria.POWER_HIGH);
 	}
 
 	public Location getLocation() {
 		try {
 			if (this.canGetLocation) {
-				Criteria criteria = new Criteria();
-				myBestProvider = locationManager.getBestProvider(criteria,
-						false);
+				
+				if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+					myBestProvider = LocationManager.NETWORK_PROVIDER;
+				}else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+					myBestProvider = LocationManager.GPS_PROVIDER;
+				}else{
+					myBestProvider = locationManager.getBestProvider(criteria,
+							false);
+				}
+
 				reqeustForUpdate();
+				Log.d("GPS", "GPS req for update");
+				Log.d("GPS", "GPS " + location);
 			}else{
+				Log.d("GPS", "GPS brak lokalizacji");
 				showSettingsPopUp();
 			}
 		} catch (Exception e) {
+			Log.d("GPS", "GPS blad");
 			e.printStackTrace();
 		}
 		return location;
@@ -74,7 +91,9 @@ public class GPS extends Service implements LocationListener {
 			location = locationManager.getLastKnownLocation(myBestProvider);
 			if (location != null) {
 				latitude = location.getLatitude();
+				Log.d("GPS", "GPS latitude" + latitude);
 				longitude = location.getLongitude();
+				Log.d("GPS", "GPS longitude" + longitude);
 			}
 		}
 	}
