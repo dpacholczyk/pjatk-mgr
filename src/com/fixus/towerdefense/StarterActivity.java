@@ -32,6 +32,8 @@ import rajawali.RajawaliActivity;
 import rajawali.postprocessing.passes.GreyScalePass;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -39,12 +41,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.fixus.td.sensors.Accelerometer;
 import com.fixus.td.sensors.GPS;
-import com.fixus.td.sensors.OurSensorManager;
+import com.fixus.td.sensors.OurSensorManager2;
+import com.fixus.towerdefense.tools.Compas;
 import com.fixus.towerdefense.tools.ObjectPosition;
 import com.fixus.towerdefense.tools.PersonPosition;
 import com.fixus.towerdefense.tools.TestRenderer;
@@ -64,8 +69,9 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 	
 	public final Context context = this;
 	
-	
-	private Accelerometer myAccelSensor;
+	private OurSensorManager2 sensorManager;
+	private ImageView image;
+	private float currentDegree;
 	
 	public GPS gps;
 	public TextView headingValue;
@@ -134,11 +140,23 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		//crossaim
+		image = new ImageView(this);
+		image.setImageResource(R.drawable.img_compass);
 		
-		OurSensorManager.debug = false;
-		OurSensorManager.printToField = false;
+		//OurSensorManager.debug = false;
+		//OurSensorManager.printToField = false;
 
-		myAccelSensor = new Accelerometer(this);
+		//myAccelSensor = new Accelerometer(this);		
+		sensorManager = new OurSensorManager2(this);
+		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER);
+		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD);		
+		
+        gps = new GPS(this);
+        if(!gps.canGetLocation()){
+        	gps.showSettingsPopUp();
+        }
+        //setContentView(R.layout.activity_starter);
 		
 //		setContentView(R.layout.activity_starter);
 //		openCvCameraView = (CameraBridgeViewBase) findViewById(R.id.javaCamera);
@@ -149,6 +167,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		openCvCameraView.setCvCameraViewListener(this);	
 		
 		mLayout.addView(openCvCameraView);
+		mLayout.addView(image);
 		
 		mSurfaceView.setZOrderMediaOverlay(true);
 		setGLBackgroundTransparent(true);
@@ -177,8 +196,29 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		}
 		mRgba = null;
 	}
+	
+	private void kompasuj(){
+        // create a rotation animation (reverse turn degree degrees)
+        RotateAnimation ra = new RotateAnimation(
+                currentDegree, 
+                -azimuthInDegress,
+                Animation.RELATIVE_TO_SELF, 0.5f, 
+                Animation.RELATIVE_TO_SELF,
+                0.5f);
+
+        // how long the animation will take place
+        ra.setDuration(210);
+        // set the animation after the end of the reservation status
+        ra.setFillAfter(true);
+        // Start the animation
+        if(image != null){
+        	image.startAnimation(ra);
+        }
+        currentDegree = -azimuthInDegress;
+	}
 
 	private int testCounter = 0;
+	float azimuthInDegress;
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 //	public Mat onCameraFrame(Mat aInputFrame) {
 		DecimalFormat df = new DecimalFormat("#.##");
@@ -186,12 +226,34 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		/*
 		 * Do wyswietlanie info z accelerometru
 		 * 
-		 */
-		Core.putText(mRgba,"x: "+ myAccelSensor.getLastX().intValue()
-				+ " y: " + myAccelSensor.getLastY().intValue() + " z: " + myAccelSensor.getLastZ().intValue() , new Point(0, 30),
-				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);
-		
+		 */	
 		Mat aInputFrame = inputFrame.rgba();
+		
+		float azimut = Compas.getAzimut(
+				sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
+				sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0));
+		azimuthInDegress = Compas.getAzimuthInDegress(azimut);
+		
+		Core.putText(aInputFrame,"Aziumut: " + azimut + " kat: " + azimuthInDegress
+				+ " kierunek: " + Compas.getKierunek(azimuthInDegress), new Point(0, 30),
+				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);
+		runOnUiThread(new Runnable(){
+            @Override
+            public void run() {
+            	kompasuj();
+            }
+		});
+		
+
+		/*if(gps.canGetLocation()){
+			Core.putText(aInputFrame,"Latitude: "+ gps.getLatitude()
+					+ " Longitude: " + gps.getLongitude(), new Point(0, 30),
+					Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);
+        } */
+		/*float[] accelerometerData = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
+		Core.putText(aInputFrame,"X: " + accelerometerData[0] + " Y: " + accelerometerData[1] + 
+				" Z: " + accelerometerData[2], new Point(0, 30),
+				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);*/
 		//kolko :)
 		//Core.ellipse(aInputFrame, new RotatedRect(new Point(10, 10),new Size(30, 30),15), new Scalar(255, 255, 0), 5);
 		
@@ -226,6 +288,8 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		
 		return aInputFrame;
 	}
+	
+	
 
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
@@ -234,7 +298,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this,
 				mLoaderCallback);
 		openCvCameraView.setOnTouchListener(this);
-		myAccelSensor.onResume();
+		sensorManager.onResume();
 	}
 	
 	@Override
@@ -242,7 +306,7 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		super.onPause();
 		if (openCvCameraView != null)
 			openCvCameraView.disableView();
-		myAccelSensor.onPause();
+		sensorManager.onResume();
 	}
 	
 	public void onDestroy() {
