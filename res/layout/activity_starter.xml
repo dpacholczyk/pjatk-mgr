@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/cross" />
+        android:src="@drawable/img_compass" />
 
     <TextView
         android:id="@+id/break1"
