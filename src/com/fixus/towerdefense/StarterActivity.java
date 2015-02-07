@@ -208,12 +208,9 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 
         // how long the animation will take place
         ra.setDuration(210);
-
         // set the animation after the end of the reservation status
         ra.setFillAfter(true);
-
         // Start the animation
-        
         if(image != null){
         	image.startAnimation(ra);
         }
@@ -233,8 +230,8 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
 		Mat aInputFrame = inputFrame.rgba();
 		
 		float azimut = Compas.getAzimut(
-				sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER),
-				sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD));
+				sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
+				sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0));
 		azimuthInDegress = Compas.getAzimuthInDegress(azimut);
 		
 		Core.putText(aInputFrame,"Aziumut: " + azimut + " kat: " + azimuthInDegress

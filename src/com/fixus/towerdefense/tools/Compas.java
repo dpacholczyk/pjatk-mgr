@@ -1,5 +1,7 @@
 package com.fixus.towerdefense.tools;
 
+import java.math.BigDecimal;
+
 import android.hardware.SensorManager;
 
 public class Compas {	
@@ -11,7 +13,9 @@ public class Compas {
 	      if (success) {
 	        float orientation[] = new float[3];
 	        SensorManager.getOrientation(R, orientation);
-	        return orientation[0]; // orientation contains: azimut, pitch and roll
+	        //zmniejszam precyzje do jednego miejsca po przecinku
+	        float azimut = new BigDecimal(orientation[0]).setScale(1, BigDecimal.ROUND_HALF_UP).floatValue();
+	        return azimut; // orientation contains: azimut, pitch and roll
 	      }
 	    }
 		return -1;
@@ -22,6 +26,7 @@ public class Compas {
 		if (azimuthInDegress < 0.0f) {
 		    azimuthInDegress += 360.0f;
 		}
+		azimuthInDegress = new BigDecimal(azimuthInDegress).setScale(0, BigDecimal.ROUND_HALF_UP).floatValue();
 		return azimuthInDegress;
 	}
 	
