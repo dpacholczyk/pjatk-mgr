@@ -5,6 +5,12 @@ import java.math.BigDecimal;
 import android.hardware.SensorManager;
 
 public class Compas {	
+	
+	public static final String SOUTH = "S";
+	public static final String NORTH = "N";
+	public static final String EAST = "E";
+	public static final String WEST = "W";
+	
 	public static float getAzimut(float[] accelerometerMatrix,float[] magneticMatrix){
 		if (accelerometerMatrix != null && magneticMatrix != null) {
 	      float R[] = new float[9];
@@ -52,5 +58,52 @@ public class Compas {
 			sKierunek = "Polnocny-zachod (NW)";
 		}
 		return sKierunek;
+	}
+
+	public static String getKierunek(float fAnkle, float shift){
+		String sKierunek = "nie znaju";
+		int iAzimut = (int) fAnkle;
+		
+		if(iAzimut >= (360 - shift) || iAzimut <= shift){
+			sKierunek = "Polnoc(N)";
+		}else if(iAzimut < (90 - shift)){
+			sKierunek = "Polnocny-wschod (NE)";
+		}else if(iAzimut >= (90 - shift) && iAzimut <= (90 + shift)){
+			sKierunek = "Wschod (E)";
+		}else if(iAzimut < (180 - shift)){
+			sKierunek = "Poludniowy-wschod (SE)";
+		}else if(iAzimut >= (180 - shift) && iAzimut <= (180 + shift)){
+			sKierunek = "Poludnie (S)";
+		}else if(iAzimut < (270-shift) ){
+			sKierunek = "Poludniowy-zachod (SW)";
+		}else if(iAzimut >= (270+shift) && iAzimut <= (270-shift)){
+			sKierunek = "Zachod (W)";
+		}else if(iAzimut < (360-shift)){
+			sKierunek = "Polnocny-zachod (NW)";
+		}
+		return sKierunek;
+	}
+
+	public static boolean checkIfDirection(String direction, float fAnkle, float shift) {
+		boolean answer = false;
+		String currentDirection = "";
+		
+		int iAzimut = (int) fAnkle;
+		
+		if(iAzimut >= (360 - shift) || iAzimut <= shift) {
+			currentDirection = NORTH;
+		} else if(iAzimut >= (90 - shift) && iAzimut <= (90 + shift)){
+			currentDirection = EAST;
+		} else if(iAzimut >= (180 - shift) && iAzimut <= (180 + shift)){
+			currentDirection = SOUTH;
+		} else if(iAzimut >= (270+shift) && iAzimut <= (270-shift)){
+			currentDirection = WEST;
+		}
+		
+		if(direction.equals(currentDirection)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

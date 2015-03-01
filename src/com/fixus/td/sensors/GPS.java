@@ -97,7 +97,7 @@ public class GPS extends Service implements LocationListener {
 			}
 		}
 	}
-
+	
 	public double getLatitude() {
 		return (location != null) ? latitude = location.getLatitude()
 				: latitude;

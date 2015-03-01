@@ -1,28 +1,12 @@
 package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
-import java.util.List;
-
-import org.apache.http.HttpVersion;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 //include packages for Android Location API
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,7 +17,9 @@ import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.fixus.td.sensors.GPS;
 import com.fixus.towerdefense.camera.CameraPreview;
+import com.fixus.towerdefense.camera.CameraTool;
 import com.jme3.app.AndroidHarness;
 import com.jme3.system.android.AndroidConfigChooser.ConfigType;
 import com.jme3.texture.Image;
@@ -59,7 +45,7 @@ public class TestActivity extends AndroidHarness {
 	private LocationManager locationManager;
 	private Location mLocation;
 	
-	
+	private GPS gps;
 	
 	private LocationListener locListener= new LocationListener() {
 		
@@ -130,43 +116,7 @@ public class TestActivity extends AndroidHarness {
 		return c;
 	}
 
-	// configure camera parameters like preview size
-	private void initializeCameraParameters() {
-		Camera.Parameters parameters = mCamera.getParameters();
-		// Get a list of supported preview sizes.
-		List<Camera.Size> sizes = mCamera.getParameters()
-				.getSupportedPreviewSizes();
-		int currentWidth = 0;
-		int currentHeight = 0;
-		boolean foundDesiredWidth = false;
-		for (Camera.Size s : sizes) {
-			if (s.width == mDesiredCameraPreviewWidth) {
-				currentWidth = s.width;
-				currentHeight = s.height;
-				foundDesiredWidth = true;
-				break;
-			}
-		}
-		if (foundDesiredWidth) {
-			parameters.setPreviewSize(currentWidth, currentHeight);
-		}
-		// we also want to use RGB565 directly
-		List<Integer> pixelFormats = parameters.getSupportedPreviewFormats();
-		for (Integer format : pixelFormats) {
-			if (format == ImageFormat.RGB_565) {
-				Log.d(TAG, "Camera supports RGB_565");
-				pixelFormatConversionNeeded = false;
-				parameters.setPreviewFormat(format);
-				break;
-			}
-		}
-		if (pixelFormatConversionNeeded == true) {
-			Log.e(TAG,
-					"Camera does not support RGB565 directly. Need conversion");
-		}
-		mCamera.setParameters(parameters); 
-	}
-
+	
 	public TestActivity() {
 		// Set the application class to run
 		appClass = "com.fixus.towerdefense.tools.LocationAccessJME";
@@ -196,10 +146,12 @@ public class TestActivity extends AndroidHarness {
     public void onResume() {
 		super.onResume();    	
     	stopPreview = false;
-		// Create an instance of Camera
+		CameraTool cTools = new CameraTool();
+    	
+    	// Create an instance of Camera
 		mCamera = getCameraInstance();
 		// initialize camera parameters
-		initializeCameraParameters();		
+		mCamera = cTools.initializeCameraParameters(mCamera);		
 		// register our callback function to get access to the camera preview
 		// frames
 		preparePreviewCallbackBuffer();
@@ -210,7 +162,13 @@ public class TestActivity extends AndroidHarness {
 		 */
 		
 		locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);		
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, locListener);		
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10, 0, locListener);		
+		
+        gps = new GPS(this);
+        if(!gps.canGetLocation()){
+        	gps.showSettingsPopUp();
+        }
+
 		
 		if (mLocation == null) {      
 			try {

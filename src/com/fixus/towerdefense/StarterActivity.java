@@ -236,47 +236,6 @@ public class StarterActivity extends RajawaliActivity implements CvCameraViewLis
             }
 		});
 		
-
-		/*if(gps.canGetLocation()){
-			Core.putText(aInputFrame,"Latitude: "+ gps.getLatitude()
-					+ " Longitude: " + gps.getLongitude(), new Point(0, 30),
-					Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);
-        } */
-		/*float[] accelerometerData = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
-		Core.putText(aInputFrame,"X: " + accelerometerData[0] + " Y: " + accelerometerData[1] + 
-				" Z: " + accelerometerData[2], new Point(0, 30),
-				Core.FONT_HERSHEY_COMPLEX, 1, new Scalar(255, 0, 0, 255), 2);*/
-		//kolko :)
-		//Core.ellipse(aInputFrame, new RotatedRect(new Point(10, 10),new Size(30, 30),15), new Scalar(255, 255, 0), 5);
-		
-//		if (mRenderer.isReady()){
-//			//Log.d("3d", mRenderer.get3DObjectPosition().toString());
-//			setRotation(myAccelSensor.getLastX().intValue(),myAccelSensor.getLastY().intValue(),myAccelSensor.getLastZ().intValue());
-//		}
-		
-		Imgproc.cvtColor(aInputFrame, grayscaleImage, Imgproc.COLOR_RGBA2RGB);
-		
-		MatOfRect objects = new MatOfRect();
-		if (cascadeClassifier != null) {
-			cascadeClassifier.detectMultiScale(grayscaleImage, objects, 1.1, 1,
-			2, new Size(absoluteObjectSize, absoluteObjectSize),
-			new Size());
-		}
-		if(this.testCounter % 10 == 0) {
-			mRenderer.setCameraPosition(-5, 5, 800f);
-		}
-		Rect[] dataArray = objects.toArray();
-//		for (int i = 0; i < dataArray.length; i++) {
-//					Core.rectangle(aInputFrame, dataArray[i].tl(), dataArray[i].br(),
-//							new Scalar(0, 255, 0, 255), 3);
-//					
-//
-//					mRenderer.setCameraPosition(-5, 5, 60f);
-//		}
-		if(dataArray.length > 0) {
-			Core.rectangle(aInputFrame, dataArray[0].tl(), dataArray[(dataArray.length - 1)].br(), new Scalar(0, 255, 0, 255), 3);
-			mRenderer.setCameraPosition(-5, 5, 60f);
-		}
 		
 		return aInputFrame;
 	}
