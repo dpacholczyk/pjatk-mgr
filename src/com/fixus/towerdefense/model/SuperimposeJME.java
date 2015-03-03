@@ -9,6 +9,8 @@
 
 package com.fixus.towerdefense.model;
 
+import android.util.Log;
+
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -58,7 +60,11 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 //	private AnimChannel mAniChannel;
 	public AnimChannel mAniChannel;
 	
-  
+	private boolean newPosition =false;
+
+	
+  public Spatial ninja;
+	
 	public static void main(String[] args) {
 		SuperimposeJME app = new SuperimposeJME();
 		app.start();
@@ -116,9 +122,13 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	}
 	public void initForegroundScene() {
 		// Load a model from test_data (OgreXML + material + texture)
-        Spatial ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
+        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
         ninja.scale(0.025f, 0.025f, 0.025f);
-        ninja.rotate(0.0f, -3.0f, 0.0f);
+        
+        // Math.toRadians przelicza kąt na radiany które podawane są do metody w celu rotacji.
+        // rotacja odbywa się tak, że 0 to znaczy skierowane na wprost zgodnie z tym jak sie patrzy przez kamere
+        // obrot np. 90 stopni oznacza obrot w lewo
+        ninja.rotate(0.0f, (float)Math.toRadians(0.0), 0.0f);
         ninja.setLocalTranslation(0.0f, -2.5f, 0.0f);
         rootNode.attachChild(ninja);
         
@@ -134,6 +144,16 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         mAniChannel.setAnim("Walk");
         mAniChannel.setLoopMode(LoopMode.Loop);
         mAniChannel.setSpeed(1f);
+	}
+	
+	private float newX, newY, newZ;
+	
+	public void rotate(float x, float y, float z) {
+		Log.d(TAG, "simpleUpdate: Nowa rotacja: " + y);
+		newX = x;
+		newY = y;
+		newZ = z;
+		newPosition = true;
 	}
 	
 	public void initForegroundCamera(float fovY) {
@@ -177,6 +197,13 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			mCameraTexture.setImage(mCameraImage);
 			mvideoBGMat.setTexture("ColorMap", mCameraTexture);
 		}
+
+		if(newPosition && ninja != null) {
+			Log.d(TAG, "simpleUpdate: rotacja: " + newY + " | " + (float)Math.toRadians(newY));
+			ninja.rotate((float)Math.toRadians(newX), (float)Math.toRadians(newY), (float)Math.toRadians(newZ));
+			newPosition = false;
+		}
+		
 		mVideoBGGeom.updateLogicalState(tpf);
 		mVideoBGGeom.updateGeometricState();
 	}

@@ -40,28 +40,48 @@ public class RadarActivity extends AndroidHarness {
 	float azimuthInDegress;
 
 
+	private int lastAzimuth = 0;
+	private float lastFullAzimuth = 0f;
+	
 	// Implement the interface for getting copies of preview frames
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
+		double angle = 0;
 		public void onPreviewFrame(byte[] data, Camera c) {
 			if (c != null && stopPreview == false) {
-				Log.d(TAG, "klatka " + i);
 				i++;
-
-				Log.d(TAG, "-------------------");
-				Log.d(TAG, RadarActivity.this.gps.getLatitude() + " | " + RadarActivity.this.gps.getLongitude());
+				
+//				Log.d(TAG, "-------------------");
+//				Log.d(TAG, RadarActivity.this.gps.getLatitude() + " | " + RadarActivity.this.gps.getLongitude());
 				float azimut = Compas.getAzimut(
 						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
 						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0));
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut);
+
+				Log.d(TAG,"Rotacja| Aziumut: " + azimut + " kat: " + azimuthInDegress
+						+ " kierunek: " + Compas.getKierunek(azimuthInDegress, 15));
+
+//				if(lastAzimuth != (int)azimuthInDegress) {
+				if(lastAzimuth != azimuthInDegress) {
+
+					Log.d(TAG, "Rotacja| różnica: " + (azimuthInDegress-lastFullAzimuth));
+					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, (azimuthInDegress-lastFullAzimuth), 0f);
+					}
+
+					lastAzimuth = (int)azimuthInDegress;
+					lastFullAzimuth = azimuthInDegress;
+					
+					Log.d(TAG, "-------------------");
+				}
 				
-				Location fromLocation = new Location("");
-				fromLocation.setLatitude(52.224432);
-				fromLocation.setLongitude(20.993049);
-				
-				Location targetLocation = new Location("");//provider name is unecessary
-			    targetLocation.setLatitude(52.224077);//your coords of course
-			    targetLocation.setLongitude(20.993757);
+//				Location fromLocation = new Location("");
+//				fromLocation.setLatitude(52.224432);
+//				fromLocation.setLongitude(20.993049);
+//				
+//				Location targetLocation = new Location("");//provider name is unecessary
+//			    targetLocation.setLatitude(52.224077);//your coords of course
+//			    targetLocation.setLongitude(20.993757);
 
 			    /**
 			     * przedziały
@@ -93,19 +113,11 @@ public class RadarActivity extends AndroidHarness {
 //			    targetLocation.setLongitude(20.993049);
 
 			    
-			    float distanceInMeters =  targetLocation.distanceTo(fromLocation);
-			    Log.d(TAG, "Odleglosc: " + distanceInMeters);
-
-			    float bearing = fromLocation.getBearing();
-			    Log.d(TAG, "Bearing: " + bearing);
-			    
-				float bearing2 = fromLocation.bearingTo(targetLocation);
-			    Log.d(TAG, "Bearing 2: " + bearing2);
-				
-				
-				Log.d(TAG,"Aziumut: " + azimut + " kat: " + azimuthInDegress
-						+ " kierunek: " + Compas.getKierunek(azimuthInDegress, 15));
-				Log.d(TAG, "-------------------");
+//			    float distanceInMeters =  targetLocation.distanceTo(fromLocation);
+//			    Log.d(TAG, "Odleglosc: " + distanceInMeters);
+//			    
+//				float bearing2 = fromLocation.bearingTo(targetLocation);
+//			    Log.d(TAG, "Bearing 2: " + bearing2);
 
 				
 				// poniżej rózne opcje manipulowania animacja
@@ -125,19 +137,19 @@ public class RadarActivity extends AndroidHarness {
 					RadarActivity.this.showModel = false;
 				}
 				
-				if(!RadarActivity.this.showModel) {
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
-							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(false);
-						}						
-					}
-				} else {
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
-							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(true);
-						}						
-					}
-				}
+//				if(!RadarActivity.this.showModel) {
+//					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+//						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(false);
+//						}						
+//					}
+//				} else {
+//					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+//						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(true);
+//						}						
+//					}
+//				}
 				
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
