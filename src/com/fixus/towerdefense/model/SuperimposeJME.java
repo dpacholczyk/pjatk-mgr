@@ -54,11 +54,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	
 	// for animation	
 	// The controller allows access to the animation sequences of the model
-//	private AnimControl mAniControl;
-	public AnimControl mAniControl;
+	private AnimControl mAniControl;
 	// the channel is used to run one animation sequence at a time
-//	private AnimChannel mAniChannel;
-	public AnimChannel mAniChannel;
+	private AnimChannel mAniChannel;
 	
 	private boolean newPosition =false;
 
@@ -213,7 +211,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	    // unused
 	}
 	
-	public Node getRootNode() {
-		return this.rootNode;
+	public void toogleAnimation(boolean switcher) {
+		if(this.mAniControl != null) {
+			this.mAniControl.setEnabled(switcher);
+		}
 	}
 }

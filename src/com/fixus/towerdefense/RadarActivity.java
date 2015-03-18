@@ -2,18 +2,17 @@ package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
 
-import org.opencv.core.Core;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Sensor;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.fixus.td.sensors.GPS;
 import com.fixus.td.sensors.OurSensorManager2;
@@ -33,17 +32,18 @@ public class RadarActivity extends AndroidHarness {
 	private boolean stopPreview;
 	private boolean showModel = false;
 	private byte[] mPreviewBufferRGB565 = null;
-	
 	private OurSensorManager2 sensorManager;
-	public GPS gps;
 	private float currentDegree;
-	float azimuthInDegress;
-
-
 	private int lastAzimuth = 0;
 	private float lastFullAzimuth = 0f;
 	
-	// Implement the interface for getting copies of preview frames
+	public Image cameraJMEImageRGB565;
+	public java.nio.ByteBuffer mPreviewByteBufferRGB565;
+	public int mPreviewWidth;
+	public int mPreviewHeight;
+	public GPS gps;
+	public float azimuthInDegress;
+	
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
 		double angle = 0;
@@ -51,8 +51,6 @@ public class RadarActivity extends AndroidHarness {
 			if (c != null && stopPreview == false) {
 				i++;
 				
-//				Log.d(TAG, "-------------------");
-//				Log.d(TAG, RadarActivity.this.gps.getLatitude() + " | " + RadarActivity.this.gps.getLongitude());
 				float azimut = Compas.getAzimut(
 						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
 						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0));
@@ -61,7 +59,6 @@ public class RadarActivity extends AndroidHarness {
 				Log.d(TAG,"Rotacja| Aziumut: " + azimut + " kat: " + azimuthInDegress
 						+ " kierunek: " + Compas.getKierunek(azimuthInDegress, 15));
 
-//				if(lastAzimuth != (int)azimuthInDegress) {
 				if(lastAzimuth != azimuthInDegress) {
 
 					Log.d(TAG, "Rotacja| różnica: " + (azimuthInDegress-lastFullAzimuth));
@@ -118,17 +115,6 @@ public class RadarActivity extends AndroidHarness {
 //			    
 //				float bearing2 = fromLocation.bearingTo(targetLocation);
 //			    Log.d(TAG, "Bearing 2: " + bearing2);
-
-				
-				// poniżej rózne opcje manipulowania animacja
-//				if(i == 150) {
-//					RadarActivity.this.showModel = true;
-//					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-////						((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(false);
-////						((com.fixus.towerdefense.model.SuperimposeJME) app).mAniChannel.setSpeed(10f);
-//						((com.fixus.towerdefense.model.SuperimposeJME) app).getRootNode().detachAllChildren();
-//					}
-//				}
 				
 				String interested = Compas.SOUTH;
 				if(Compas.checkIfDirection(interested, azimuthInDegress, 10)) {
@@ -137,19 +123,15 @@ public class RadarActivity extends AndroidHarness {
 					RadarActivity.this.showModel = false;
 				}
 				
-//				if(!RadarActivity.this.showModel) {
-//					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-//						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(false);
-//						}						
-//					}
-//				} else {
-//					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-//						if(((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl != null) {
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).mAniControl.setEnabled(true);
-//						}						
-//					}
-//				}
+				if(!RadarActivity.this.showModel) {
+					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleAnimation(false);
+					}
+				} else {
+					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleAnimation(true);
+					}
+				}
 				
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
@@ -162,18 +144,11 @@ public class RadarActivity extends AndroidHarness {
 				}
 				cameraJMEImageRGB565.setData(mPreviewByteBufferRGB565);
 				if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-					((com.fixus.towerdefense.model.SuperimposeJME) app)
-							.setVideoBGTexture(cameraJMEImageRGB565);
+					((com.fixus.towerdefense.model.SuperimposeJME) app).setVideoBGTexture(cameraJMEImageRGB565);
 				}
 			}
 		}
 	};
-
-	
-	public Image cameraJMEImageRGB565;
-	public java.nio.ByteBuffer mPreviewByteBufferRGB565;
-	public int mPreviewWidth;
-	public int mPreviewHeight;
 
 	public RadarActivity() {
 		// Set the application class to run
@@ -195,6 +170,8 @@ public class RadarActivity extends AndroidHarness {
 		mouseEventsInvertY = true;
 	}
 	
+	LinearLayout l;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
@@ -207,7 +184,8 @@ public class RadarActivity extends AndroidHarness {
 	    if(!gps.canGetLocation()){
 	    	gps.showSettingsPopUp();
 	    }
-
+	    
+	    l = (LinearLayout) findViewById(R.layout.activity_radar);
 	}
 	
 	@Override
@@ -228,9 +206,27 @@ public class RadarActivity extends AndroidHarness {
 			this.mPreview = new CameraPreview(this, mCamera, mCameraCallback);
 			// We do not want to display the Camera Preview view at startup - so
 			// we resize it to 1x1 pixel.
+//			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
+//			addContentView(this.mPreview, lp);			
+
+			Button b = new Button(this);
+			b.setText("qwe");
+			addContentView(b, new ViewGroup.LayoutParams(250, 250));
+			b.setOnClickListener(
+					new View.OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+							startActivity(i);
+						}
+					}
+			);
+
 			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
 			addContentView(this.mPreview, lp);			
-		}		
+
+		}
 	}
 	
 	public void preparePreviewCallbackBuffer() {		
@@ -255,7 +251,6 @@ public class RadarActivity extends AndroidHarness {
 //		return cameraJMEImageRGB565;
 	}
 
-	
 	@Override
 	protected void onPause() {
 		this.stopPreview = true;

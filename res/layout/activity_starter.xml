@@ -9,15 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.fixus.towerdefense.StarterActivity" >
 
-    <org.opencv.android.JavaCameraView
-        android:id="@+id/javaCamera"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:clickable="true"
-        android:visibility="gone"
-        opencv:camera_id="any"
-        opencv:show_fps="true" />
-
     <TextView
         android:id="@+id/headingLabel"
         android:layout_width="wrap_content"
