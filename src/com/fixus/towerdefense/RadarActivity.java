@@ -1,12 +1,14 @@
 package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Sensor;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +20,10 @@ import com.fixus.td.sensors.GPS;
 import com.fixus.td.sensors.OurSensorManager2;
 import com.fixus.towerdefense.camera.CameraPreview;
 import com.fixus.towerdefense.camera.CameraTool;
+import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.tools.Compas;
+import com.fixus.towerdefense.tools.MapPoint;
+import com.fixus.towerdefense.tools.PhonePosition;
 import com.jme3.app.AndroidHarness;
 import com.jme3.system.android.AndroidConfigChooser.ConfigType;
 import com.jme3.texture.Image;
@@ -49,90 +54,12 @@ public class RadarActivity extends AndroidHarness {
 		double angle = 0;
 		public void onPreviewFrame(byte[] data, Camera c) {
 			if (c != null && stopPreview == false) {
-				i++;
-				
 				float azimut = Compas.getAzimut(
 						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
-						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0));
+						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0)
+				);
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut);
 
-				Log.d(TAG,"Rotacja| Aziumut: " + azimut + " kat: " + azimuthInDegress
-						+ " kierunek: " + Compas.getKierunek(azimuthInDegress, 15));
-
-				if(lastAzimuth != azimuthInDegress) {
-
-					Log.d(TAG, "Rotacja| różnica: " + (azimuthInDegress-lastFullAzimuth));
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, (azimuthInDegress-lastFullAzimuth), 0f);
-					}
-
-					lastAzimuth = (int)azimuthInDegress;
-					lastFullAzimuth = azimuthInDegress;
-					
-					Log.d(TAG, "-------------------");
-				}
-				
-//				Location fromLocation = new Location("");
-//				fromLocation.setLatitude(52.224432);
-//				fromLocation.setLongitude(20.993049);
-//				
-//				Location targetLocation = new Location("");//provider name is unecessary
-//			    targetLocation.setLatitude(52.224077);//your coords of course
-//			    targetLocation.setLongitude(20.993757);
-
-			    /**
-			     * przedziały
-			     * 0 - północ
-			     * -90 : 0 - północnyc zachód
-			     * -90 - zachód
-			     * -90 : -180 - południowy zachód
-			     * -180/180 - południe
-			     * 180 : 90 - południowy wschód
-			     * 90 - wschód
-			     * 90 : 0 - północny wschód
-			     * 
-			     */
-			    
-			    // na polnoc oscyluje wokol 0
-//			    targetLocation.setLatitude(52.225431);//your coords of course
-//			    targetLocation.setLongitude(20.993114);
-
-			    // na zachód oscyluje wokoł -90
-//			    targetLocation.setLatitude(52.224353);//your coords of course
-//			    targetLocation.setLongitude(20.991440);
-
-			    // na wschold oscyluje wokol 90
-//			    targetLocation.setLatitude(52.224432);//your coords of course
-//			    targetLocation.setLongitude(20.994358);
-
-			    // na poludniu oscyluje wokol 180
-//			    targetLocation.setLatitude(52.223998);//your coords of course
-//			    targetLocation.setLongitude(20.993049);
-
-			    
-//			    float distanceInMeters =  targetLocation.distanceTo(fromLocation);
-//			    Log.d(TAG, "Odleglosc: " + distanceInMeters);
-//			    
-//				float bearing2 = fromLocation.bearingTo(targetLocation);
-//			    Log.d(TAG, "Bearing 2: " + bearing2);
-				
-				String interested = Compas.SOUTH;
-				if(Compas.checkIfDirection(interested, azimuthInDegress, 10)) {
-					RadarActivity.this.showModel = true;
-				} else {
-					RadarActivity.this.showModel = false;
-				}
-				
-				if(!RadarActivity.this.showModel) {
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleAnimation(false);
-					}
-				} else {
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleAnimation(true);
-					}
-				}
-				
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
 				if (pixelFormatConversionNeeded) {
@@ -146,6 +73,44 @@ public class RadarActivity extends AndroidHarness {
 				if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 					((com.fixus.towerdefense.model.SuperimposeJME) app).setVideoBGTexture(cameraJMEImageRGB565);
 				}
+				
+				i++;
+				
+				if(i % 10 == 0 && GameStatus.randomedPoints.size() > 0 && gps != null && gps.getLocation() != null) {
+					Log.d(TAG, "Sprawdzam czy patrze na punkt");
+//					Iterator<Location> it = GameStatus.randomedPoints.iterator();
+//					while(it.hasNext()) {
+//						
+//					}
+					Location target = GameStatus.randomedPoints.get(0);
+					Log.d(TAG, "Pozycja target: " + target.getLongitude() + " | " + target.getLatitude());
+					float bearing2 = gps.getLocation().bearingTo(target);
+				    Log.d(TAG, "Bearing: " + bearing2);
+				    Log.d(TAG, "kompas: " + azimuthInDegress);
+				    Log.d(TAG,"Rotacja| Aziumut: " + azimut + " kat: " + azimuthInDegress
+				     + " kierunek: " + Compas.getDirection(azimuthInDegress, 15));
+				} 
+//				else {
+//					Log.d(TAG, GameStatus.randomedPoints.size() + "");
+//					Log.d(TAG, gps.toString());
+//				}
+				
+//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
+				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+					stopPreview = true;
+					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+					startActivity(i);	
+				}
+				
+
+				if(lastAzimuth != azimuthInDegress) {
+					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, (azimuthInDegress-lastFullAzimuth), 0f);
+					}
+					lastAzimuth = (int)azimuthInDegress;
+					lastFullAzimuth = azimuthInDegress;
+				}
+
 			}
 		}
 	};
@@ -178,11 +143,16 @@ public class RadarActivity extends AndroidHarness {
 
 		sensorManager = new OurSensorManager2(this);
 		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER);
-		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD);		
+		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD);	
 		
 	    gps = new GPS(this);
 	    if(!gps.canGetLocation()){
 	    	gps.showSettingsPopUp();
+	    }
+	    if(this.gps != null) {
+			if(this.gps.getLocation() != null) {
+				GameStatus.randomedPoints = MapPoint.generatePoints(this.gps.getLocation(), GameStatus.getRadiusInMeters(), GameStatus.points);
+			}
 	    }
 	    
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
@@ -253,10 +223,16 @@ public class RadarActivity extends AndroidHarness {
 
 	@Override
 	protected void onPause() {
+		Log.d(TAG, "onPause");
 		this.stopPreview = true;
 		super.onPause();		
-		// Make sure to release the camera immediately on pause.
-		this.cTools.releaseCamera(this.mCamera);
+		if(this.mCamera != null) {
+			Log.d(TAG, "zwalniam");
+			this.mCamera.setPreviewCallback(null);
+			this.mCamera.release();
+			this.mCamera = null;
+		}
+		Log.d(TAG, "zwolnione");
 		// remove the SurfaceView
 //		ViewGroup parent = (ViewGroup) mPreview.getParent(); 
 //		parent.removeView(mPreview);

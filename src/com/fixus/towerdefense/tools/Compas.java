@@ -7,7 +7,11 @@ import android.hardware.SensorManager;
 public class Compas {	
 	
 	public static final String SOUTH = "S";
+	public static final String SOUTH_EAST = "SE";
+	public static final String SOUTH_WEST = "SW";
 	public static final String NORTH = "N";
+	public static final String NORTH_EAST = "NE";
+	public static final String NORTH_WEST = "NW";
 	public static final String EAST = "E";
 	public static final String WEST = "W";
 	
@@ -36,7 +40,7 @@ public class Compas {
 		return azimuthInDegress;
 	}
 	
-	public static String getKierunek(float fAnkle){
+	public static String getDirection(float fAnkle){
 		String sKierunek = "nie znaju";
 		int iAzimut = (int) fAnkle;
 		
@@ -60,7 +64,7 @@ public class Compas {
 		return sKierunek;
 	}
 
-	public static String getKierunek(float fAnkle, float shift){
+	public static String getDirection(float fAnkle, float shift){
 		String sKierunek = "nie znaju";
 		int iAzimut = (int) fAnkle;
 		
@@ -98,6 +102,14 @@ public class Compas {
 			currentDirection = SOUTH;
 		} else if(iAzimut >= (270+shift) && iAzimut <= (270-shift)){
 			currentDirection = WEST;
+		} else if(iAzimut < 90){
+			currentDirection = NORTH_EAST;
+		} else if(iAzimut < 180){
+			currentDirection = SOUTH_EAST;
+		} else if(iAzimut < 270 ){
+			currentDirection = SOUTH_WEST;
+		} else if(iAzimut < 360){
+			currentDirection = NORTH_WEST;
 		}
 		
 		if(direction.equals(currentDirection)) {

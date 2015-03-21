@@ -33,13 +33,6 @@ public class CameraTool {
 
 		return c;
 	}
-
-	public void releaseCamera(Camera mCamera) {
-		if (mCamera != null) {
-			mCamera.release();
-			mCamera = null;
-		}
-	}
 	
 	// configure camera parameters like preview size
 	public Camera initializeCameraParameters(Camera mCamera) {
