@@ -9,5 +9,20 @@
     <string name="heading">heading</string>
     <string name="gps_break">GPS</string>
     <string name="orientation_break">ORIENTATION</string>
+    <string name="title_activity_main_window">MainWindow</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
+    <!-- ekran startowy -->
+    <string name="start_button">Start</string>
+    <string name="option_button">Options</string>
+    <string name="exit_button">Exit</string>    
+    <!-- drugi ekran po start -->
+    <string name="title_activity_second">Second</string>
+    <string name="title_activity_second_view">Second_view</string>
+    <string name="range">Set range</string>
+    <string name="sel_range">Selected range: </string>
+    <string name="start_btn">Start</string>
+    <string name="point_n">Set number of points</string>
+    <string name="sel_point">Number of points: </string>
 </resources>

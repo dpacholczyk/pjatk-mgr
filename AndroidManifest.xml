@@ -7,13 +7,18 @@
     <uses-sdk
         android:minSdkVersion="16"
         android:targetSdkVersion="21" />
-    
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.hardware.camera.autofocus" android:required="false" />
-    <uses-permission android:name="android.hardware.camera.front" android:required="false" />
-    
-	<uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-permission
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-permission
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -24,38 +29,46 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-        
+
     <application
-        android:allowBackup="true"	
+        android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
-        
-		<meta-data
-		     android:name="com.google.android.maps.v2.API_KEY"
-		     android:value="AIzaSyAszMPfX5kPYjBiMoGI_tmQboOxI3rht-g" />
-		<meta-data android:name="com.google.android.gms.version"
-        	android:value="@integer/google_play_services_version" />
-        
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyAszMPfX5kPYjBiMoGI_tmQboOxI3rht-g" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
             android:name=".RadarActivity"
             android:label="@string/app_name"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape" >
+        </activity>
+        <activity
+            android:name=".LocatorActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar" >
+        </activity>
+        <activity
+            android:name=".MainWindow"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_main_window"
+            android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity 
-            android:name=".LocatorActivity" 
-            android:label="@string/app_name"
-     		android:theme="@android:style/Theme.NoTitleBar">
+        <activity
+            android:name=".Second"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_second"
+            android:theme="@style/FullscreenTheme" >
         </activity>
-        
     </application>
-    
-    
 
 </manifest>

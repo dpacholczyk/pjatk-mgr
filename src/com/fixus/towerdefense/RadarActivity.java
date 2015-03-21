@@ -96,11 +96,11 @@ public class RadarActivity extends AndroidHarness {
 //				}
 				
 //				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
-				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
-					stopPreview = true;
-					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-					startActivity(i);	
-				}
+//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+//					stopPreview = true;
+//					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+//					startActivity(i);	
+//				}
 				
 
 				if(lastAzimuth != azimuthInDegress) {
@@ -156,6 +156,14 @@ public class RadarActivity extends AndroidHarness {
 	    }
 	    
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
+	    
+	    //obieranie intencji - obecnie bez zadnych ustawien
+  		Intent intent = getIntent();
+  		int range = intent.getIntExtra(Second.RANGE, 0);
+  		int points = intent.getIntExtra(Second.POINTS, 0);
+  		
+  		Log.e("Testu", "Range: " + range);
+  		Log.e("Testu", "Points: " + points);
 	}
 	
 	@Override
