@@ -29,7 +29,7 @@ import com.jme3.system.android.AndroidConfigChooser.ConfigType;
 import com.jme3.texture.Image;
 
 public class RadarActivity extends AndroidHarness {
-	private static final String TAG = "TD_TestActvity";
+	private static final String TAG = "TD_RADARACTIVITY";
 	private Camera mCamera;
 	private CameraPreview mPreview;
 	private CameraTool cTools;
@@ -96,11 +96,11 @@ public class RadarActivity extends AndroidHarness {
 //				}
 				
 //				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
-//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
-//					stopPreview = true;
-//					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-//					startActivity(i);	
-//				}
+				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+					stopPreview = true;
+					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+					startActivity(i);	
+				}
 				
 
 				if(lastAzimuth != azimuthInDegress) {
@@ -140,7 +140,15 @@ public class RadarActivity extends AndroidHarness {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
-
+		Log.d(TAG, "onCreate");
+	    //obieranie intencji - obecnie bez zadnych ustawien
+  		Intent intent = getIntent();
+  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
+  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
+  		
+  		Log.d(TAG, "radius: " + GameStatus.radius);
+  		Log.d(TAG, "points: " + GameStatus.points);
+		
 		sensorManager = new OurSensorManager2(this);
 		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER);
 		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD);	
@@ -156,14 +164,6 @@ public class RadarActivity extends AndroidHarness {
 	    }
 	    
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
-	    
-	    //obieranie intencji - obecnie bez zadnych ustawien
-  		Intent intent = getIntent();
-  		int range = intent.getIntExtra(Second.RANGE, 0);
-  		int points = intent.getIntExtra(Second.POINTS, 0);
-  		
-  		Log.e("Testu", "Range: " + range);
-  		Log.e("Testu", "Points: " + points);
 	}
 	
 	@Override
@@ -171,7 +171,15 @@ public class RadarActivity extends AndroidHarness {
 		super.onResume();    	
     	this.stopPreview = false;
 		this.cTools = new CameraTool();
-		
+		Log.d(TAG, "onResume");
+	    //obieranie intencji - obecnie bez zadnych ustawien
+  		Intent intent = getIntent();
+  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
+  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
+  		
+  		Log.d(TAG, "resume radius: " + GameStatus.radius);
+  		Log.d(TAG, "resume points: " + GameStatus.points);
+
 		this.mCamera = this.cTools.getCameraInstance();
 		this.mCamera = this.cTools.initializeCameraParameters(this.mCamera);
 		this.preparePreviewCallbackBuffer();

@@ -14,7 +14,7 @@ public class MapPoint {
 	public static Location getLocation(Location location, int radius) {
 		Random random = new Random();
 		// promień podany w kątach
-		double r = (double)radius / METERS_IN_DEGREES;
+		double r = radius / METERS_IN_DEGREES;
 //		Log.d(TAG, "radius: " + radius);
 //		Log.d(TAG, "r: " + r);
 //		Log.d(TAG, "metry w stopniu: " + METERS_IN_DEGREES);
@@ -28,8 +28,12 @@ public class MapPoint {
 		double x = w * Math.cos(t);
 		double y = w * Math.sin(t);
 		
+//		Log.d(TAG, "u: " + u);
+//		Log.d(TAG, "v: " + v);
+		
 		// uwzględnienie zmniejszenie dystansu wschód - zachód
-		double xPrim = x / Math.cos(y0);
+//		double xPrim = x / Math.cos(y0);
+		double xPrim = x;
 		
 		// nowa lokalizacja
 		Location randomLocation = new Location("Random location in radius " + radius);
@@ -41,8 +45,9 @@ public class MapPoint {
 	
 	public static List<Location> generatePoints(Location location, int radius, int pointsCount) {
 		List<Location> locations = new ArrayList<Location>();
-		
+//		Log.d(TAG, "Points count: " + pointsCount);
 		for(int i = 0; i < pointsCount; i++) {
+//			Log.d(TAG, "Losuje punkt " + i);
 			locations.add(getLocation(location, radius));
 		}
 		
