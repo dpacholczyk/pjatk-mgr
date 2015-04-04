@@ -31,13 +31,14 @@ public class Compas {
 		return -1;
 	}
 	
-	public static float getAzimuthInDegress(float fAzimuth){
+	public static float getAzimuthInDegress(float fAzimuth,boolean isLandscape){
 		float azimuthInDegress = (float)Math.toDegrees(fAzimuth);
+		float landscapeRotation = isLandscape ? 90f : 0f;
 		if (azimuthInDegress < 0.0f) {
 		    azimuthInDegress += 360.0f;
 		}
 		azimuthInDegress = new BigDecimal(azimuthInDegress).setScale(0, BigDecimal.ROUND_HALF_UP).floatValue();
-		return azimuthInDegress;
+		return azimuthInDegress + landscapeRotation;
 	}
 	
 	public static String getDirection(float fAnkle){

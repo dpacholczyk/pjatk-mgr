@@ -5,6 +5,10 @@ import java.util.Iterator;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Sensor;
@@ -14,6 +18,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
 import com.fixus.td.sensors.GPS;
@@ -42,24 +48,46 @@ public class RadarActivity extends AndroidHarness {
 	private int lastAzimuth = 0;
 	private float lastFullAzimuth = 0f;
 	
+	private ImageView compassNeedle;
+	
 	public Image cameraJMEImageRGB565;
 	public java.nio.ByteBuffer mPreviewByteBufferRGB565;
 	public int mPreviewWidth;
 	public int mPreviewHeight;
 	public GPS gps;
 	public float azimuthInDegress;
+	public float azimut;
 	
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
 		double angle = 0;
 		public void onPreviewFrame(byte[] data, Camera c) {
 			if (c != null && stopPreview == false) {
-				float azimut = Compas.getAzimut(
+				azimut = Compas.getAzimut(
 						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
 						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0)
 				);
-				azimuthInDegress = Compas.getAzimuthInDegress(azimut);
-
+				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+				
+				
+				//tu ustawiamy nasza lokazliazacje
+				Location fromLocation = new Location("");
+				if(gps != null && gps.getLocation() != null){
+					fromLocation = gps.getLocation();
+				}else{
+					//52.133340, 20.666227
+					fromLocation.setLatitude(52.133340);
+					fromLocation.setLongitude(20.666227);
+				}
+				//tu jest lokalizacja do ktorej zmierzamy
+				Location targetLocation = new Location("");
+				//52.132052, 20.644810
+				//52.127363, 20.671718
+			    targetLocation.setLatitude(52.132052);
+			    targetLocation.setLongitude(20.644810);
+			    //a to ustawi odpowiednio strzalke
+				drawCompassToPoint(fromLocation, targetLocation);
+				
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
 				if (pixelFormatConversionNeeded) {
@@ -76,7 +104,7 @@ public class RadarActivity extends AndroidHarness {
 				
 				i++;
 				
-				if(i % 10 == 0 && GameStatus.randomedPoints.size() > 0 && gps != null && gps.getLocation() != null) {
+				/*if(i % 10 == 0 && GameStatus.randomedPoints.size() > 0 && gps != null && gps.getLocation() != null) {
 					Log.d(TAG, "Sprawdzam czy patrze na punkt");
 //					Iterator<Location> it = GameStatus.randomedPoints.iterator();
 //					while(it.hasNext()) {
@@ -96,16 +124,20 @@ public class RadarActivity extends AndroidHarness {
 //				}
 				
 //				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
-				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+				
+				
+				/* W poziomie mape wlacz ziom:)
+				 * 
+				 * if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
 					stopPreview = true;
 					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
 					startActivity(i);	
-				}
+				}*/
 				
-
+				
 				if(lastAzimuth != azimuthInDegress) {
 					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, (azimuthInDegress-lastFullAzimuth), 0f);
+						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, azimuthInDegress-lastFullAzimuth, 0f);
 					}
 					lastAzimuth = (int)azimuthInDegress;
 					lastFullAzimuth = azimuthInDegress;
@@ -114,6 +146,61 @@ public class RadarActivity extends AndroidHarness {
 			}
 		}
 	};
+	
+	private void drawCompassToPoint(Location fromLocation,Location targetLocation){
+	    if(fromLocation != null && targetLocation != null){
+			//wyliczamy kierunek miedzy punktem poczatkowym
+	    	//a punktem docelowym, niezaleznym od miejsca w ktore patrzymy
+	    	float directionInDegress = (float)angleFromCoordinate(
+		    		fromLocation.getLatitude(),
+		    		fromLocation.getLongitude(),
+		    		targetLocation.getLatitude(),
+		    		targetLocation.getLongitude()
+		    		);
+		    //teraz obracamy strzalke kompasu o odpowiedni kat
+	    	//wyliczony z Wskazanie kompasu minus kat wyliczony powyzej
+	    	//Dlatego, ze igla ma miec obrot o 0 stopni jesli wskazujemy
+	    	//w pkt docelowy. Inaczej ma sie obracac w odpowiednia strone
+		    rotateNeedle(-(azimuthInDegress - directionInDegress));
+		    /*Log.d(TAG, "kat1: " + dupa);
+		    Log.d(TAG, "kat2: " + azimuthInDegress);
+		    Log.d(TAG, "kat3: " + (azimuthInDegress - dupa));
+		    Log.d(TAG, "kat4: " + (-(azimuthInDegress - dupa)));*/
+	    }
+	}
+	/*
+	 * Wyliczenie kata pomiedzy docelowa lokazlizacja, a naszym obecnym pkt
+	 */
+	private double angleFromCoordinate(double lat1, double long1, double lat2,
+	        double long2) {
+
+	    double dLon = (long2 - long1);
+
+	    double y = Math.sin(dLon) * Math.cos(lat2);
+	    double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+	            * Math.cos(lat2) * Math.cos(dLon);
+
+	    double brng = Math.atan2(y, x);
+
+	    brng = Math.toDegrees(brng);
+	    brng = (brng + 360) % 360;
+	    brng = 360 - brng;
+
+	    return brng;
+	}
+	
+	private void rotateNeedle(float degress){
+		//tu jest tylko rotacja obrazka o zadany kat
+	    Bitmap myImg = BitmapFactory.decodeResource(getResources(), R.drawable.compass_needle1);
+
+	    Matrix matrix = new Matrix();
+	    matrix.postRotate(degress);
+
+	    Bitmap rotated = Bitmap.createBitmap(myImg, 0, 0, myImg.getWidth(), myImg.getHeight(),
+	            matrix, true);
+
+	    compassNeedle.setImageBitmap(rotated);
+	}
 
 	public RadarActivity() {
 		// Set the application class to run
@@ -208,10 +295,15 @@ public class RadarActivity extends AndroidHarness {
 						}
 					}
 			);
-
-			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
-			addContentView(this.mPreview, lp);			
-
+			
+			if(compassNeedle == null){
+				compassNeedle = new ImageView(this);
+				compassNeedle.setImageResource(R.drawable.compass_needle1);
+			    addContentView(compassNeedle, new ViewGroup.LayoutParams(3000, 500));
+			    
+				ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
+				addContentView(this.mPreview, lp);			
+			}
 		}
 	}
 	
