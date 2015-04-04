@@ -10,17 +10,25 @@
 package com.fixus.towerdefense.model;
 
 import android.util.Log;
+import android.view.View;
 
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
 import com.jme3.animation.LoopMode;
 import com.jme3.app.SimpleApplication;
+import com.jme3.collision.CollisionResults;
+import com.jme3.input.TouchInput;
+import com.jme3.input.controls.TouchListener;
+import com.jme3.input.controls.TouchTrigger;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
@@ -70,6 +78,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 
 	@Override
 	public void simpleInitApp() {
+		//dodanie listenera
+		addTouchListener();
 		// Do not display statistics
 		setDisplayStatView(true);
 		setDisplayFps(true);
@@ -80,7 +90,64 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		initBackgroundCamera();		
 		initForegroundCamera(mForegroundCamFOVY);
 	}
-
+	
+	private void addTouchListener(){
+		//inputManager.addListener(new TouchTrigger(0),"Click");
+		String sTouchId = "tap";
+		inputManager.addMapping(sTouchId, new TouchTrigger(TouchInput.ALL));
+		inputManager.addListener(oTouch, sTouchId);
+	}
+	
+	private TouchListener oTouch = new TouchListener() {
+		public void onTouch(String name, TouchEvent event, float tpf) {			
+			if (event.getType() == TouchEvent.Type.TAP) {
+				Log.d(TAG, "tap");
+				
+		        CollisionResults results = new CollisionResults();
+		        // Convert screen click to 3d position
+		        Vector2f click2d = new Vector2f(event.getX(), event.getY());
+		        Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+		        Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+		        // Aim the ray from the clicked spot forwards.
+		        Ray ray = new Ray(click3d, dir);
+		        // Collect intersections between ray and all nodes in results list.
+		        rootNode.collideWith(ray, results);
+		        
+		        if (results.size() > 0) {
+		        	Log.d(TAG, "wow");
+		        	if (results.getClosestCollision()!=null) {
+						Log.d(TAG, results.getClosestCollision().getGeometry().getName());
+					}
+		        }else{
+					Log.d(TAG, ":(");
+				}
+		        
+		        /*Ray oray = new Ray(new Vector3f(event.getX()-1, event.getY()-1, 0.0f),new Vector3f(event.getX(), event.getY(), ninja.getWorldScale().z));
+				CollisionResults results = new CollisionResults();
+				int collisionSphere = ninja.collideWith(oray, results);
+				Log.d(TAG, "z: " + ninja.getWorldScale().z);
+				Log.d(TAG, "x: " + ninja.getWorldScale().x + "  " + event.getX());
+				Log.d(TAG, "y: " + ninja.getWorldScale().y+ "  " + event.getY());
+				
+				String name2 ="";
+	
+				if (results.getClosestCollision()!=null) {
+					name2 = results.getClosestCollision().getGeometry().getName();
+					Log.d(TAG, name2 + "   " + collisionSphere);
+				}else{
+					Log.d(TAG, ":(");
+				}*/
+			}
+	
+			if (event.getType() == TouchEvent.Type.SCROLL) {
+			}
+	
+			if (event.getType() == TouchEvent.Type.DOWN) {
+			}
+			
+			}
+		};
+	
 	// This function creates the geometry, the viewport and the virtual camera
 	// needed for rendering the incoming Android camera frames in the scene
 	// graph
