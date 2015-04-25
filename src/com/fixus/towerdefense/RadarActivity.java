@@ -1,7 +1,6 @@
 package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -15,11 +14,8 @@ import android.hardware.Sensor;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
 import com.fixus.td.sensors.GPS;
@@ -30,7 +26,9 @@ import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.tools.Compas;
 import com.fixus.towerdefense.tools.MapPoint;
 import com.fixus.towerdefense.tools.PhonePosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.jme3.app.AndroidHarness;
+import com.jme3.renderer.android.TextureUtil;
 import com.jme3.system.android.AndroidConfigChooser.ConfigType;
 import com.jme3.texture.Image;
 
@@ -47,8 +45,9 @@ public class RadarActivity extends AndroidHarness {
 	private float currentDegree;
 	private int lastAzimuth = 0;
 	private float lastFullAzimuth = 0f;
-	
 	private ImageView compassNeedle;
+	
+	protected LatLng selectedPosition = null;
 	
 	public Image cameraJMEImageRGB565;
 	public java.nio.ByteBuffer mPreviewByteBufferRGB565;
@@ -79,14 +78,19 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation.setLatitude(52.133340);
 					fromLocation.setLongitude(20.666227);
 				}
+
 				//tu jest lokalizacja do ktorej zmierzamy
 				Location targetLocation = new Location("");
 				//52.132052, 20.644810
 				//52.127363, 20.671718
-			    targetLocation.setLatitude(52.132052);
-			    targetLocation.setLongitude(20.644810);
+//			    targetLocation.setLatitude(52.132052);
+//			    targetLocation.setLongitude(20.644810);
 			    //a to ustawi odpowiednio strzalke
-				drawCompassToPoint(fromLocation, targetLocation);
+				if(RadarActivity.this.selectedPosition != null) {
+					targetLocation.setLatitude(RadarActivity.this.selectedPosition.latitude);
+					targetLocation.setLongitude(RadarActivity.this.selectedPosition.longitude);
+					drawCompassToPoint(fromLocation, targetLocation);
+				}
 				
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
@@ -124,15 +128,13 @@ public class RadarActivity extends AndroidHarness {
 //				}
 				
 //				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
+				*/
 				
-				
-				/* W poziomie mape wlacz ziom:)
-				 * 
-				 * if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
 					stopPreview = true;
 					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
 					startActivity(i);	
-				}*/
+				}
 				
 				
 				if(lastAzimuth != azimuthInDegress) {
@@ -207,12 +209,12 @@ public class RadarActivity extends AndroidHarness {
 		// appClass = "mygame.Main";
 		appClass = "com.fixus.towerdefense.model.SuperimposeJME";
 		// Try ConfigType.FASTEST; or ConfigType.LEGACY if you have problems
-//		eglConfigType = ConfigType.BEST;
-		eglConfigType = ConfigType.FASTEST;
+		eglConfigType = ConfigType.BEST;
+//		eglConfigType = ConfigType.FASTEST;
 		
 		// Exit Dialog title & message
-		exitDialogTitle = "Exit?";
-		exitDialogMessage = "Press Yes";
+		exitDialogTitle = "Wyjść?";
+		exitDialogMessage = "Naciśnik TAK";
 		// Enable verbose logging
 		eglConfigVerboseLogging = false;
 		// Choose screen orientation
@@ -220,6 +222,7 @@ public class RadarActivity extends AndroidHarness {
 		mouseEventsInvertX = true;
 		// Invert the MouseEvents Y (default = true)
 		mouseEventsInvertY = true;
+		TextureUtil.ENABLE_COMPRESSION = false;
 	}
 	
 	LinearLayout l;
@@ -230,11 +233,18 @@ public class RadarActivity extends AndroidHarness {
 		Log.d(TAG, "onCreate");
 	    //obieranie intencji - obecnie bez zadnych ustawien
   		Intent intent = getIntent();
-  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
-  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
-  		
-  		Log.d(TAG, "radius: " + GameStatus.radius);
-  		Log.d(TAG, "points: " + GameStatus.points);
+  		if(intent.hasExtra(Second.RANGE)) {
+  	  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
+  		}
+  		if(intent.hasExtra(Second.POINTS)) {
+  	  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
+  		}
+  		if(intent.hasExtra("selectedLat")) {
+  			double tmpLat = intent.getDoubleExtra("selectedLat", 0);
+  			double tmpLng = intent.getDoubleExtra("selectedLng", 0);
+  			this.selectedPosition = new LatLng(tmpLat, tmpLng);
+  		}
+		this.cTools = new CameraTool();
 		
 		sensorManager = new OurSensorManager2(this);
 		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER);
@@ -257,15 +267,7 @@ public class RadarActivity extends AndroidHarness {
     public void onResume() {
 		super.onResume();    	
     	this.stopPreview = false;
-		this.cTools = new CameraTool();
 		Log.d(TAG, "onResume");
-	    //obieranie intencji - obecnie bez zadnych ustawien
-  		Intent intent = getIntent();
-  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
-  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
-  		
-  		Log.d(TAG, "resume radius: " + GameStatus.radius);
-  		Log.d(TAG, "resume points: " + GameStatus.points);
 
 		this.mCamera = this.cTools.getCameraInstance();
 		this.mCamera = this.cTools.initializeCameraParameters(this.mCamera);
@@ -281,25 +283,11 @@ public class RadarActivity extends AndroidHarness {
 			// we resize it to 1x1 pixel.
 //			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
 //			addContentView(this.mPreview, lp);			
-
-			Button b = new Button(this);
-			b.setText("qwe");
-			addContentView(b, new ViewGroup.LayoutParams(250, 250));
-			b.setOnClickListener(
-					new View.OnClickListener() {
-						
-						@Override
-						public void onClick(View v) {
-							Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-							startActivity(i);
-						}
-					}
-			);
 			
 			if(compassNeedle == null){
 				compassNeedle = new ImageView(this);
 				compassNeedle.setImageResource(R.drawable.compass_needle1);
-			    addContentView(compassNeedle, new ViewGroup.LayoutParams(3000, 500));
+			    addContentView(compassNeedle, new ViewGroup.LayoutParams(300, 500));
 			    
 				ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
 				addContentView(this.mPreview, lp);			
@@ -335,17 +323,27 @@ public class RadarActivity extends AndroidHarness {
 		this.stopPreview = true;
 		super.onPause();		
 		if(this.mCamera != null) {
-			Log.d(TAG, "zwalniam");
 			this.mCamera.setPreviewCallback(null);
 			this.mCamera.release();
 			this.mCamera = null;
 		}
-		Log.d(TAG, "zwolnione");
 		// remove the SurfaceView
 //		ViewGroup parent = (ViewGroup) mPreview.getParent(); 
 //		parent.removeView(mPreview);
 	}
 
+	@Override
+	protected void onDestroy() {
+		this.stopPreview = true;
+		super.onDestroy();
+		if(this.mCamera != null) {
+			this.mCamera.setPreviewCallback(null);
+			this.mCamera.release();
+			this.mCamera = null;
+		}
+		Log.d(TAG, "onDestroy");
+	}
+	
 	public static void yCbCrToRGB565(byte[] yuvs, int width, int height,
 			byte[] rgbs) {
 

@@ -8,4 +8,8 @@ public class PhonePosition {
 		
 		return false;
 	}
+	
+	public void calibration() {
+		
+	}
 }

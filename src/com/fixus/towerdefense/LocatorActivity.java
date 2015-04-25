@@ -1,8 +1,8 @@
 package com.fixus.towerdefense;
 
-import java.util.Iterator;
 import java.util.List;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -13,11 +13,14 @@ import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.tools.MapPoint;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class LocatorActivity extends FragmentActivity {
@@ -59,7 +62,7 @@ public class LocatorActivity extends FragmentActivity {
 					    .build();                   // Creates a CameraPosition from the builder
 						this.googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 						
-						Log.d(TAG, "obszar: " + GameStatus.getRadiusInMeters());
+//						Log.d(TAG, "obszar: " + GameStatus.getRadiusInMeters());
 						// Instantiates a new CircleOptions object and defines the center and radius
 						CircleOptions circleOptions = new CircleOptions()
 						    .center(center)
@@ -82,6 +85,27 @@ public class LocatorActivity extends FragmentActivity {
 //							Log.d(TAG, "Biore z size");
 							this.addRandomPoints(GameStatus.randomedPoints);
 						}
+						this.googleMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+							
+							@Override
+							public boolean onMarkerClick(Marker arg0) {
+								Log.d(TAG, arg0.getTitle() + " | " + arg0.getPosition().toString());
+								
+								return false;
+							}
+						});
+						this.googleMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+							
+							@Override
+							public void onInfoWindowClick(Marker arg0) {
+								Log.d(TAG, "info: " + arg0.getTitle() + " | " + arg0.getPosition().toString());
+								Intent intent = new Intent(LocatorActivity.this, RadarActivity.class);
+							    intent.putExtra("selectedLat", arg0.getPosition().latitude);
+							    intent.putExtra("selectedLng", arg0.getPosition().longitude);
+							    startActivity(intent);								
+							}
+						});
+
 					}
 					
 				}

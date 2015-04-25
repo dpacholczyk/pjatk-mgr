@@ -1,5 +1,7 @@
 package com.fixus.towerdefense.camera;
 
+import android.util.Log;
+
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -115,13 +117,13 @@ public class CameraAccessJME extends SimpleApplication implements AnimEventListe
 		Camera videoBGCam = cam.clone();		
 		videoBGCam.setParallelProjection(true);
 		// Also create a custom viewport.
-		ViewPort videoBGVP = renderManager.createMainView("VideoBGView",
-				videoBGCam);
+		ViewPort videoBGVP = renderManager.createMainView("VideoBGView", videoBGCam);
 		// Attach the geometry representing the video background to the
 		// viewport.
 		videoBGVP.attachScene(mVideoBGGeom);
 	}
 	public void initForegroundScene() {
+		Log.d(TAG, "Ninja mesh xml");
 		// Load a model from test_data (OgreXML + material + texture)
         Spatial ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
         ninja.scale(0.025f, 0.025f, 0.025f);

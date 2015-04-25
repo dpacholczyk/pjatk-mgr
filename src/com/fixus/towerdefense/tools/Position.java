@@ -1,8 +1,11 @@
 package com.fixus.towerdefense.tools;
 
+import android.location.Location;
+
 public abstract class Position {
 	private double latitude;
 	private double longitude;
+	private double altitude;
 	
 	public Position() {
 		
@@ -11,6 +14,12 @@ public abstract class Position {
 	public Position(double latitude, double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
+	}
+	
+	public Position(Location location) {
+		this.latitude = location.getLatitude();
+		this.longitude = location.getLongitude();
+		this.altitude = location.getAltitude();
 	}
 	
 	public void setLatitude(double latitude) {
@@ -27,5 +36,13 @@ public abstract class Position {
 	
 	public double getLongitude() {
 		return this.longitude;
+	}
+	
+	public void setAltitude(double altitude) {
+		this.altitude = altitude;
+	}
+	
+	public double getAltitude() {
+		return this.altitude;
 	}
 }

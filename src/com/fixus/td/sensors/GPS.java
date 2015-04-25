@@ -21,6 +21,7 @@ public class GPS extends Service implements LocationListener {
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters
 	// The minimum time between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 1000 * 5; // 5 sec
+	private static final String TAG = "GPS";
 	/*
 	 * Jeszcze nie uzywane!! Trzeba obsluzyc te minimalne wartosci, jesli chcemy
 	 * a uwazam ze chyba warto
@@ -70,14 +71,14 @@ public class GPS extends Service implements LocationListener {
 				}
 
 				reqeustForUpdate();
-				Log.d("GPS", "GPS req for update");
-				Log.d("GPS", "GPS " + location);
+//				Log.d(TAG, "GPS req for update");
+//				Log.d(TAG, "GPS " + location);
 			}else{
-				Log.d("GPS", "GPS brak lokalizacji");
+//				Log.d(TAG, "GPS brak lokalizacji");
 				showSettingsPopUp();
 			}
 		} catch (Exception e) {
-			Log.d("GPS", "GPS blad");
+//			Log.d(TAG, "GPS blad");
 			e.printStackTrace();
 		}
 		return location;
@@ -91,9 +92,9 @@ public class GPS extends Service implements LocationListener {
 			location = locationManager.getLastKnownLocation(myBestProvider);
 			if (location != null) {
 				latitude = location.getLatitude();
-				Log.d("GPS", "GPS latitude" + latitude);
+//				Log.d(TAG, "GPS latitude" + latitude);
 				longitude = location.getLongitude();
-				Log.d("GPS", "GPS longitude" + longitude);
+//				Log.d(TAG, "GPS longitude" + longitude);
 			}
 		}
 	}

@@ -42,7 +42,7 @@ import com.jme3.texture.Texture2D;
 
 public class SuperimposeJME extends SimpleApplication  implements AnimEventListener { 
 
-	private static final String TAG = "SuperimposeJME";
+	private static final String TAG = "TD_SuperimposeJME";
 	
 	// The geometry which will represent the video background
 	private Geometry mVideoBGGeom;
@@ -100,6 +100,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	
 	private TouchListener oTouch = new TouchListener() {
 		public void onTouch(String name, TouchEvent event, float tpf) {			
+			Log.d(TAG, TouchEvent.Type.TAP + "");
 			if (event.getType() == TouchEvent.Type.TAP) {
 				Log.d(TAG, "tap");
 				
@@ -163,8 +164,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		// width.
 		mVideoBGGeom.setLocalScale(1.f * newWidth, 1.f, 1);
 		// Apply a unshaded material which we will use for texturing.
-		mvideoBGMat = new Material(assetManager,
-				"Common/MatDefs/Misc/Unshaded.j3md");
+		mvideoBGMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		mVideoBGGeom.setMaterial(mvideoBGMat);
 		// Create a new texture which will hold the Android camera preview frame
 		// pixels.
@@ -179,16 +179,22 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		Camera videoBGCam = cam.clone();		
 		videoBGCam.setParallelProjection(true);
 		// Also create a custom viewport.
-		ViewPort videoBGVP = renderManager.createMainView("VideoBGView",
-				videoBGCam);
+		ViewPort videoBGVP = renderManager.createMainView("VideoBGView", videoBGCam);
 		// Attach the geometry representing the video background to the
 		// viewport.
 		videoBGVP.attachScene(mVideoBGGeom);
 	}
 	public void initForegroundScene() {
+		rootNode.detachAllChildren();
 		// Load a model from test_data (OgreXML + material + texture)
         ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
+//        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.j3o");
         ninja.scale(0.025f, 0.025f, 0.025f);
+//        Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md"); // default material
+      Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"); // default material
+//        Material mat = assetManager.loadMaterial("Materials/Ninja/Ninja.j3m");
+        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/Ninja/Ninja.jpg"));
+        ninja.setMaterial(mat);               
         
         // Math.toRadians przelicza kąt na radiany które podawane są do metody w celu rotacji.
         // rotacja odbywa się tak, że 0 to znaczy skierowane na wprost zgodnie z tym jak sie patrzy przez kamere
@@ -264,7 +270,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		}
 
 		if(newPosition && ninja != null) {
-			Log.d(TAG, "simpleUpdate: rotacja: " + newY + " | " + (float)Math.toRadians(newY));
+//			Log.d(TAG, "simpleUpdate: rotacja: " + newY + " | " + (float)Math.toRadians(newY));
 			ninja.rotate((float)Math.toRadians(newX), (float)Math.toRadians(newY), (float)Math.toRadians(newZ));
 			newPosition = false;
 		}
