@@ -33,6 +33,7 @@ public class Compas {
 	
 	public static float getAzimuthInDegress(float fAzimuth,boolean isLandscape){
 		float azimuthInDegress = (float)Math.toDegrees(fAzimuth);
+		//jak telefon jest trzymany poziomo nalezy uwzglednic przesuniêcie o 90 stopni
 		float landscapeRotation = isLandscape ? 90f : 0f;
 		if (azimuthInDegress < 0.0f) {
 		    azimuthInDegress += 360.0f;
