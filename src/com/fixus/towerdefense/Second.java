@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
+
+import com.fixus.towerdefense.tools.PhonePosition;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

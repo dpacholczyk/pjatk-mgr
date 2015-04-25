@@ -2,6 +2,8 @@ package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -45,9 +47,12 @@ public class RadarActivity extends AndroidHarness {
 	private float currentDegree;
 	private int lastAzimuth = 0;
 	private float lastFullAzimuth = 0f;
+	private float lastFullRoll = 0f;
 	private ImageView compassNeedle;
 	
 	protected LatLng selectedPosition = null;
+	protected float rollAvg = 0f;
+	protected int rollAvgCounter = 32;
 	
 	public Image cameraJMEImageRGB565;
 	public java.nio.ByteBuffer mPreviewByteBufferRGB565;
@@ -78,6 +83,47 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation.setLatitude(52.133340);
 					fromLocation.setLongitude(20.666227);
 				}
+				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER, 5);
+//				Log.d(TAG, "SENSOR: " + tmpMatrix[0] +  " | " + tmpMatrix[1] + " | " + tmpMatrix[2]);
+//				PhonePosition phone = new PhonePosition();
+				
+				/**
+				 * @TODO
+				 * przenieść do PhonePosition do osobnej metody
+				 */
+				if(!PhonePosition.calibrated) {
+					if(i == 0) {
+						new AlertDialog.Builder(RadarActivity.this)
+					    .setTitle("Kalibracja")
+					    .setMessage("Rozpoczynam kalibrację...trzymaj telefon w pozycji wyjściowej")
+					    .setCancelable(true)
+					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
+			                public void onClick(DialogInterface dialog, int id) {
+			                    dialog.cancel();
+			                }
+					     })
+					     .show();
+					}
+					if(i < RadarActivity.this.rollAvgCounter) {
+						RadarActivity.this.rollAvg += tmpMatrix[2];
+					} else {
+						RadarActivity.this.rollAvg /= i;
+						PhonePosition phone = new PhonePosition();
+						phone.calibration(RadarActivity.this.rollAvg);
+						new AlertDialog.Builder(RadarActivity.this)
+					    .setTitle("Kalibracja")
+					    .setMessage("Kalibracja zakończona: " + RadarActivity.this.rollAvg)
+					    .setCancelable(true)
+					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
+			                public void onClick(DialogInterface dialog, int id) {
+			                    dialog.cancel();
+			                }
+					     })
+					     .show();
+						
+						GameStatus.phone = phone;
+					}
+				}				
 
 				//tu jest lokalizacja do ktorej zmierzamy
 				Location targetLocation = new Location("");
@@ -139,7 +185,16 @@ public class RadarActivity extends AndroidHarness {
 				
 				if(lastAzimuth != azimuthInDegress) {
 					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, azimuthInDegress-lastFullAzimuth, 0f);
+						Log.d(TAG, "TEST: " + tmpMatrix[2]);
+						if(GameStatus.phone != null && GameStatus.phone.calibrated) {
+							/**
+							 * trzeba przekazać róznicę między ostatnim odczytem roll a odczytem z danej klatki
+							 * wynika to z faktu, że metoda rotująca kamerę nie rotuje do danego stopnia a rotuje o zadaną wartość w każdej klatce
+							 * należy uwzględnić znak, aby rotacja mogła odbyć się w obu kierunkach
+							 */
+							float currentRollRotation = tmpMatrix[2] - RadarActivity.this.lastFullRoll;
+							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(currentRollRotation, azimuthInDegress-lastFullAzimuth, 0f);
+						}
 					}
 					lastAzimuth = (int)azimuthInDegress;
 					lastFullAzimuth = azimuthInDegress;

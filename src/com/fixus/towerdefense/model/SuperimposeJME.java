@@ -220,11 +220,15 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	private float newX, newY, newZ;
 	
 	public void rotate(float x, float y, float z) {
-		Log.d(TAG, "simpleUpdate: Nowa rotacja: " + y);
+//		Log.d(TAG, "simpleUpdate: Nowa rotacja: " + y);
 		newX = x;
 		newY = y;
 		newZ = z;
 		newPosition = true;
+	}
+	
+	public void rotateCamera(float x, float y, float z) {
+		ninja.rotate(x, y, z);
 	}
 	
 	public void initForegroundCamera(float fovY) {
