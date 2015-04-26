@@ -12,6 +12,7 @@ package com.fixus.towerdefense.model;
 import android.util.Log;
 import android.view.View;
 
+import com.fixus.towerdefense.RadarActivity;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -118,6 +119,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		        	Log.d(TAG, "wow");
 		        	if (results.getClosestCollision()!=null) {
 						Log.d(TAG, results.getClosestCollision().getGeometry().getName());
+						RadarActivity.messageDialog(results.getClosestCollision().getGeometry().getName());
 					}
 		        }else{
 					Log.d(TAG, ":(");

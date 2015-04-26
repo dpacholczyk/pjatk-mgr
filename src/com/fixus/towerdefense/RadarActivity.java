@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.fixus.td.sensors.GPS;
 import com.fixus.td.sensors.OurSensorManager2;
@@ -36,6 +37,9 @@ import com.jme3.texture.Image;
 
 public class RadarActivity extends AndroidHarness {
 	private static final String TAG = "TD_RADARACTIVITY";
+	
+	private static RadarActivity oTest;
+	
 	private Camera mCamera;
 	private CameraPreview mPreview;
 	private CameraTool cTools;
@@ -262,6 +266,9 @@ public class RadarActivity extends AndroidHarness {
 	}
 
 	public RadarActivity() {
+		if(oTest == null){
+			oTest = this;
+		}
 		// Set the application class to run
 		// appClass = "mygame.Main";
 		appClass = "com.fixus.towerdefense.model.SuperimposeJME";
@@ -476,4 +483,11 @@ public class RadarActivity extends AndroidHarness {
 		}
 	}
 	
+	public static void messageDialog(final String text){
+		oTest.runOnUiThread(new Runnable() {
+			  public void run() {
+			    Toast.makeText(oTest, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
+			  }
+		});
+	}
 }
