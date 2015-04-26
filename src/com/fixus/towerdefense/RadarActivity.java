@@ -193,7 +193,9 @@ public class RadarActivity extends AndroidHarness {
 							 * należy uwzględnić znak, aby rotacja mogła odbyć się w obu kierunkach
 							 */
 							float currentRollRotation = tmpMatrix[2] - RadarActivity.this.lastFullRoll;
-							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(currentRollRotation, azimuthInDegress-lastFullAzimuth, 0f);
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(currentRollRotation, azimuthInDegress-lastFullAzimuth, 0f);
+							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, azimuthInDegress-lastFullAzimuth, 0f);
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).rotateCamera(currentRollRotation, 0f, 0f);
 						}
 					}
 					lastAzimuth = (int)azimuthInDegress;
