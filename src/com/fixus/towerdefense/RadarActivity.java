@@ -513,7 +513,18 @@ public class RadarActivity extends AndroidHarness {
 	public static void messageDialog(final String text){
 		oTest.runOnUiThread(new Runnable() {
 			  public void run() {
-			    Toast.makeText(oTest, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
+			    //Toast.makeText(oTest, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
+			    
+			    new AlertDialog.Builder(oTest)
+			    .setTitle("Title")
+			    .setMessage("Do you really want to pick up it?")
+			    .setIcon(android.R.drawable.ic_dialog_alert)
+			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+			        public void onClick(DialogInterface dialog, int whichButton) {
+			        	Toast.makeText(oTest, "Object: " + text + " is picked up", Toast.LENGTH_SHORT).show();
+			        }})
+			     .setNegativeButton(android.R.string.no, null).show();
 			  }
 		});
 	}
