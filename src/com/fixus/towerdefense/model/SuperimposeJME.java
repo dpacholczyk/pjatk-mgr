@@ -37,6 +37,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture2D;
@@ -217,6 +218,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         mAniChannel.setAnim("Walk");
         mAniChannel.setLoopMode(LoopMode.Loop);
         mAniChannel.setSpeed(1f);
+        
+        ninja.setCullHint(CullHint.Always);
 	}
 	
 	private float newX, newY, newZ;
@@ -293,6 +296,16 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	public void toogleAnimation(boolean switcher) {
 		if(this.mAniControl != null) {
 			this.mAniControl.setEnabled(switcher);
+		}
+	}
+	
+	public void toogleObject(boolean show) {
+		if(ninja != null) {
+			if(show) {
+				ninja.setCullHint(CullHint.Never);
+			} else {
+				ninja.setCullHint(CullHint.Always);
+			}
 		}
 	}
 }

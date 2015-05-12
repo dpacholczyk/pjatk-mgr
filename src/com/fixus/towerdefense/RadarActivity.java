@@ -28,6 +28,7 @@ import com.fixus.towerdefense.camera.CameraTool;
 import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.tools.Compas;
 import com.fixus.towerdefense.tools.MapPoint;
+import com.fixus.towerdefense.tools.ObjectPosition;
 import com.fixus.towerdefense.tools.PhonePosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.jme3.app.AndroidHarness;
@@ -76,6 +77,9 @@ public class RadarActivity extends AndroidHarness {
 						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0)
 				);
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+				double azimuthInDegress2 = Compas.getAzimuthInDegress(azimut, false);
+				Log.d(TAG, "Azymut: " + azimuthInDegress2);
+
 				
 				
 				//tu ustawiamy nasza lokazliazacje
@@ -84,8 +88,8 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation = gps.getLocation();
 				}else{
 					//52.133340, 20.666227
-					fromLocation.setLatitude(52.133340);
-					fromLocation.setLongitude(20.666227);
+					fromLocation.setLatitude(52.108837);
+					fromLocation.setLongitude(21.043263);
 				}
 				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER, 5);
 //				Log.d(TAG, "SENSOR: " + tmpMatrix[0] +  " | " + tmpMatrix[1] + " | " + tmpMatrix[2]);
@@ -140,6 +144,18 @@ public class RadarActivity extends AndroidHarness {
 					targetLocation.setLatitude(RadarActivity.this.selectedPosition.latitude);
 					targetLocation.setLongitude(RadarActivity.this.selectedPosition.longitude);
 					drawCompassToPoint(fromLocation, targetLocation);
+					
+					/**
+					 * @TODO
+					 * to oczywiśćie tmp. obiekt nie może być tworzony w każdej klatce
+					 */
+					ObjectPosition object = new ObjectPosition();
+					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
+					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
+					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+						((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
+					}					
+
 				}
 				
 				mPreviewByteBufferRGB565.clear();
@@ -231,6 +247,17 @@ public class RadarActivity extends AndroidHarness {
 		    Log.d(TAG, "kat4: " + (-(azimuthInDegress - dupa)));*/
 	    }
 	}
+	
+	private double getAzimuthData(double azimuth, Location fromLocation, Location targetLocation) {
+		float directionInDegress = (float)angleFromCoordinate(
+	    		fromLocation.getLatitude(),
+	    		fromLocation.getLongitude(),
+	    		targetLocation.getLatitude(),
+	    		targetLocation.getLongitude()
+	    		);
+		return (-(azimuth - directionInDegress));
+	}
+	
 	/*
 	 * Wyliczenie kata pomiedzy docelowa lokazlizacja, a naszym obecnym pkt
 	 */
