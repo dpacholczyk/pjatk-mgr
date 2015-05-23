@@ -94,30 +94,30 @@ public class RadarActivity extends AndroidHarness {
 
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
 				
-				framesValues0[frameCounter] = azimuthInDegress;
+//				framesValues0[frameCounter] = azimuthInDegress;
 				
 				azimuthInDegress2 = Compas.getAzimuthInDegress(azimut,  false);
 
-				framesValues[frameCounter] = azimuthInDegress2;
-				frameCounter++;
-				frameLimiter++;
-				if(frameLimiter >= azimuthLimiter) {
-					double azimuthSum = 0.0f;
-					for(int fCounter = 0; fCounter < azimuthLimiter; fCounter++) {
-						azimuthSum += framesValues[fCounter];
-					}
-					azimuthAvg = azimuthSum / azimuthLimiter;
-					
-					Arrays.sort(framesValues0);
-					float median;
-					if (framesValues0.length % 2 == 0) {
-					    median = ((float)framesValues0[framesValues0.length/2] + (float)framesValues0[framesValues0.length/2 - 1])/2;
-					}
-					else {
-					    median = (float) framesValues0[framesValues0.length/2];
-					}
-					azimuthMedian = median;
-				}
+//				framesValues[frameCounter] = azimuthInDegress2;
+//				frameCounter++;
+//				frameLimiter++;
+//				if(frameLimiter >= azimuthLimiter) {
+//					double azimuthSum = 0.0f;
+//					for(int fCounter = 0; fCounter < azimuthLimiter; fCounter++) {
+//						azimuthSum += framesValues[fCounter];
+//					}
+//					azimuthAvg = azimuthSum / azimuthLimiter;
+//					
+//					Arrays.sort(framesValues0);
+//					float median;
+//					if (framesValues0.length % 2 == 0) {
+//					    median = ((float)framesValues0[framesValues0.length/2] + (float)framesValues0[framesValues0.length/2 - 1])/2;
+//					}
+//					else {
+//					    median = (float) framesValues0[framesValues0.length/2];
+//					}
+//					azimuthMedian = median;
+//				}
 				
 				/**
 				 * @TODO
@@ -203,7 +203,7 @@ public class RadarActivity extends AndroidHarness {
 					 */
 					ObjectPosition object = new ObjectPosition();
 					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
-					boolean show = object.isSeen(azimuthAvg, GameStatus.horizontalViewAngle);
+					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //					if(!object.inDistance(distance)) {
 //						show = false;
 //					}
@@ -211,13 +211,13 @@ public class RadarActivity extends AndroidHarness {
 					if(frameLimiter >= azimuthLimiter) {
 						Log.d("SHOW", "warun");
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-							float newObjectPosition = object.countObjectPosition(azimuthAvg, GameStatus.horizontalViewAngle);
+							float newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
+							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
 						}
-						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(true);
-						}
+//						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(true);
+//						}
 					}
 
 //				}
@@ -290,8 +290,8 @@ public class RadarActivity extends AndroidHarness {
 	    	//wyliczony z Wskazanie kompasu minus kat wyliczony powyzej
 	    	//Dlatego, ze igla ma miec obrot o 0 stopni jesli wskazujemy
 	    	//w pkt docelowy. Inaczej ma sie obracac w odpowiednia strone
-//		    rotateNeedle(-(azimuthInDegress - directionInDegress));
-		    rotateNeedle(-(azimuthMedian - directionInDegress));
+		    rotateNeedle(-(azimuthInDegress - directionInDegress));
+//		    rotateNeedle(-(azimuthMedian - directionInDegress));
 	    }
 	}
 	
