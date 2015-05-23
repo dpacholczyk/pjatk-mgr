@@ -207,9 +207,8 @@ public class RadarActivity extends AndroidHarness {
 //					if(!object.inDistance(distance)) {
 //						show = false;
 //					}
-
+					Log.d("SHOW", "" + frameLimiter);
 					if(frameLimiter >= azimuthLimiter) {
-						Log.d("SHOW", "warun");
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							float newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
@@ -270,6 +269,9 @@ public class RadarActivity extends AndroidHarness {
 					lastAzimuth = (int)azimuthInDegress;
 					lastFullAzimuth = azimuthInDegress;
 				}
+				
+				frameCounter++;
+				frameLimiter++;
 
 			}
 		}
