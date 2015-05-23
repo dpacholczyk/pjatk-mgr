@@ -1,6 +1,7 @@
 package com.fixus.towerdefense;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fixus.td.sensors.GPS;
@@ -26,6 +28,7 @@ import com.fixus.td.sensors.OurSensorManager2;
 import com.fixus.towerdefense.camera.CameraPreview;
 import com.fixus.towerdefense.camera.CameraTool;
 import com.fixus.towerdefense.game.GameStatus;
+import com.fixus.towerdefense.model.SuperimposeJME;
 import com.fixus.towerdefense.tools.Compas;
 import com.fixus.towerdefense.tools.MapPoint;
 import com.fixus.towerdefense.tools.ObjectPosition;
@@ -65,35 +68,87 @@ public class RadarActivity extends AndroidHarness {
 	public int mPreviewHeight;
 	public GPS gps;
 	public float azimuthInDegress;
+	public float azimuthInDegress2;
 	public float azimut;
+	public String debugText;
+	float azimuthMedian = 0f;
 	
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
+		int frameCounter = 0;
+		int frameLimiter = 0;
+		int azimuthLimiter = 5;
+		double azimuthAvg = 0.0;
+		double[] framesValues = new double[azimuthLimiter];
+		
+		float[] framesValues0 = new float[azimuthLimiter];
+		
+		float distance = -1;
 		double angle = 0;
 		public void onPreviewFrame(byte[] data, Camera c) {
+			RadarActivity.this.debugText = "";
 			if (c != null && stopPreview == false) {
 				azimut = Compas.getAzimut(
 						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
 						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0)
 				);
+				RadarActivity.this.debugText += " | az: " + azimut;
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-				double azimuthInDegress2 = Compas.getAzimuthInDegress(azimut, false);
-				Log.d(TAG, "Azymut: " + azimuthInDegress2);
+				
+				framesValues0[frameCounter] = azimuthInDegress;
 
 				
+				
+				azimuthInDegress2 = Compas.getAzimuthInDegress(azimut,  false);
+
+				framesValues[frameCounter] = azimuthInDegress2;
+				frameCounter++;
+				frameLimiter++;
+				Log.d("SMOOTH", "frameLimiter: " + frameLimiter);
+				if(frameLimiter >= azimuthLimiter) {
+					Log.d("SMOOTH", "wyliczenia");
+					double azimuthSum = 0.0f;
+					for(int fCounter = 0; fCounter < azimuthLimiter; fCounter++) {
+						azimuthSum += framesValues[fCounter];
+					}
+					azimuthAvg = azimuthSum / azimuthLimiter;
+					Log.d("SMOOTH", "wyliczenia: " + azimuthAvg);
+					
+					Arrays.sort(framesValues0);
+					float median;
+					if (framesValues0.length % 2 == 0) {
+					    median = ((float)framesValues0[framesValues0.length/2] + (float)framesValues0[framesValues0.length/2 - 1])/2;
+					}
+					else {
+					    median = (float) framesValues0[framesValues0.length/2];
+					}
+					azimuthMedian = median;
+					Log.d("SMOOTH", "wyliczenia: " + azimuthMedian);
+				}
+				Log.d("FRAMES", "frameLimiter: " + frameLimiter);
+				Log.d("SMOOTH", "media: "  + azimuthMedian);
+				Log.d("SMOOTH", "avg: " + azimuthAvg);
+//				azimuthText.setText(azimuthInDegress + " | " + azimuthInDegress2 + " | " + azimuthAvg);
+
+				RadarActivity.this.debugText += " | " + azimuthInDegress + " | " + azimuthInDegress2 + " | " + azimuthAvg;
+				
+				/**
+				 * @TODO
+				 * przyrocic utawianie fromLocation
+				 */
 				
 				//tu ustawiamy nasza lokazliazacje
 				Location fromLocation = new Location("");
 				if(gps != null && gps.getLocation() != null){
 					fromLocation = gps.getLocation();
+					
 				}else{
+					
 					//52.133340, 20.666227
-					fromLocation.setLatitude(52.108837);
-					fromLocation.setLongitude(21.043263);
+//					fromLocation.setLatitude(52.109766);
+//					fromLocation.setLongitude(21.044573);
 				}
 				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER, 5);
-//				Log.d(TAG, "SENSOR: " + tmpMatrix[0] +  " | " + tmpMatrix[1] + " | " + tmpMatrix[2]);
-//				PhonePosition phone = new PhonePosition();
 				
 				/**
 				 * @TODO
@@ -133,16 +188,27 @@ public class RadarActivity extends AndroidHarness {
 					}
 				}				
 
+				double tmpLat = 52.223787;
+				double tmpLng = 20.994379;
+				
 				//tu jest lokalizacja do ktorej zmierzamy
 				Location targetLocation = new Location("");
-				//52.132052, 20.644810
-				//52.127363, 20.671718
-//			    targetLocation.setLatitude(52.132052);
-//			    targetLocation.setLongitude(20.644810);
+				// altanka
+//			    targetLocation.setLatitude(52.107814);
+//			    targetLocation.setLongitude(21.042722);
+//			    RadarActivity.this.selectedPosition = new LatLng(52.107814, 21.042722);
+				// srodek drogi
+			    targetLocation.setLatitude(tmpLat);
+			    targetLocation.setLongitude(tmpLng);
+			    RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
 			    //a to ustawi odpowiednio strzalke
-				if(RadarActivity.this.selectedPosition != null) {
-					targetLocation.setLatitude(RadarActivity.this.selectedPosition.latitude);
-					targetLocation.setLongitude(RadarActivity.this.selectedPosition.longitude);
+			    /**
+			     * @TODO przywrocic if
+			     * @TODO przywrocic ustawianie targetLocation
+			     */
+//				if(RadarActivity.this.selectedPosition != null) {
+//					targetLocation.setLatitude(RadarActivity.this.selectedPosition.latitude);
+//					targetLocation.setLongitude(RadarActivity.this.selectedPosition.longitude);
 					drawCompassToPoint(fromLocation, targetLocation);
 					
 					/**
@@ -151,13 +217,39 @@ public class RadarActivity extends AndroidHarness {
 					 */
 					ObjectPosition object = new ObjectPosition();
 					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
-					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
-					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
-					}					
+					boolean show = object.isSeen(azimuthAvg, GameStatus.horizontalViewAngle);
+//					Log.d("TEST_GPS", show + " | " + azimuthAvg);
+//					if(!object.inDistance(distance)) {
+//						show = false;
+//					}
+					distance = fromLocation.distanceTo(targetLocation);
+					if(frameLimiter >= azimuthLimiter) {
+						Log.d("SHOW", "warun");
+						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+							Log.d("SHOW", "spelnione");
+							float newObjectPosition = object.countObjectPosition(azimuthAvg, GameStatus.horizontalViewAngle);
+							Log.d("SHOW", "position: " + newObjectPosition);
+							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
+							/**
+							 * @TODO 
+							 * tymczasowe wylaczenie rotacji
+							 */
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).moveX(newObjectPosition);
+						}
+						
+						if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
+//							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(true);
+							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
+						}
+					}
 
-				}
-				
+//				}
+
+					if(frameCounter == azimuthLimiter) {
+						frameCounter = 0;
+						frameLimiter = 0;
+					}
+
 				mPreviewByteBufferRGB565.clear();
 				// Perform processing on the camera preview data.
 				if (pixelFormatConversionNeeded) {
@@ -174,38 +266,20 @@ public class RadarActivity extends AndroidHarness {
 				
 				i++;
 				
-				/*if(i % 10 == 0 && GameStatus.randomedPoints.size() > 0 && gps != null && gps.getLocation() != null) {
-					Log.d(TAG, "Sprawdzam czy patrze na punkt");
-//					Iterator<Location> it = GameStatus.randomedPoints.iterator();
-//					while(it.hasNext()) {
-//						
-//					}
-					Location target = GameStatus.randomedPoints.get(0);
-					Log.d(TAG, "Pozycja target: " + target.getLongitude() + " | " + target.getLatitude());
-					float bearing2 = gps.getLocation().bearingTo(target);
-				    Log.d(TAG, "Bearing: " + bearing2);
-				    Log.d(TAG, "kompas: " + azimuthInDegress);
-				    Log.d(TAG,"Rotacja| Aziumut: " + azimut + " kat: " + azimuthInDegress
-				     + " kierunek: " + Compas.getDirection(azimuthInDegress, 15));
-				} 
-//				else {
-//					Log.d(TAG, GameStatus.randomedPoints.size() + "");
-//					Log.d(TAG, gps.toString());
+				/**
+				 * @TODO
+				 * przywrocic sprawdzanie czy lezy plasko w celu zmiany widoku
+				 */
+//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
+//					stopPreview = true;
+//					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+//					startActivity(i);	
 //				}
 				
-//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 3)) {
-				*/
-				
-				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
-					stopPreview = true;
-					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-					startActivity(i);	
-				}
-				
+				RadarActivity.this.azimuthText.setText(RadarActivity.this.debugText);
 				
 				if(lastAzimuth != azimuthInDegress) {
 					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-						Log.d(TAG, "TEST: " + tmpMatrix[2]);
 						if(GameStatus.phone != null && GameStatus.phone.calibrated) {
 							/**
 							 * trzeba przekazać róznicę między ostatnim odczytem roll a odczytem z danej klatki
@@ -236,15 +310,15 @@ public class RadarActivity extends AndroidHarness {
 		    		targetLocation.getLatitude(),
 		    		targetLocation.getLongitude()
 		    		);
+	    	
+	    //	Log.d("TEST_GPS", fromLocation.getLatitude() + " |  " + fromLocation.getLongitude() + " | " + targetLocation.getLatitude() + " | " + targetLocation.getLongitude());
+	    	
 		    //teraz obracamy strzalke kompasu o odpowiedni kat
 	    	//wyliczony z Wskazanie kompasu minus kat wyliczony powyzej
 	    	//Dlatego, ze igla ma miec obrot o 0 stopni jesli wskazujemy
 	    	//w pkt docelowy. Inaczej ma sie obracac w odpowiednia strone
-		    rotateNeedle(-(azimuthInDegress - directionInDegress));
-		    /*Log.d(TAG, "kat1: " + dupa);
-		    Log.d(TAG, "kat2: " + azimuthInDegress);
-		    Log.d(TAG, "kat3: " + (azimuthInDegress - dupa));
-		    Log.d(TAG, "kat4: " + (-(azimuthInDegress - dupa)));*/
+//		    rotateNeedle(-(azimuthInDegress - directionInDegress));
+		    rotateNeedle(-(azimuthMedian - directionInDegress));
 	    }
 	}
 	
@@ -321,8 +395,7 @@ public class RadarActivity extends AndroidHarness {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
-		Log.d(TAG, "onCreate");
-	    //obieranie intencji - obecnie bez zadnych ustawien
+		//obieranie intencji - obecnie bez zadnych ustawien
   		Intent intent = getIntent();
   		if(intent.hasExtra(Second.RANGE)) {
   	  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
@@ -350,15 +423,17 @@ public class RadarActivity extends AndroidHarness {
 				GameStatus.randomedPoints = MapPoint.generatePoints(this.gps.getLocation(), GameStatus.getRadiusInMeters(), GameStatus.points);
 			}
 	    }
-	    
+	    this.debugText = "";
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
 	}
+	
+	public TextView azimuthText = null;
+	
 	
 	@Override
     public void onResume() {
 		super.onResume();    	
     	this.stopPreview = false;
-		Log.d(TAG, "onResume");
 
 		this.mCamera = this.cTools.getCameraInstance();
 		this.mCamera = this.cTools.initializeCameraParameters(this.mCamera);
@@ -380,9 +455,24 @@ public class RadarActivity extends AndroidHarness {
 				compassNeedle.setImageResource(R.drawable.compass_needle1);
 			    addContentView(compassNeedle, new ViewGroup.LayoutParams(300, 500));
 			    
-				ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
-				addContentView(this.mPreview, lp);			
+			    /**
+			     * @TODO
+			     * przywrócenie tego
+			     */
+//				ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
+//				addContentView(this.mPreview, lp);			
 			}
+			
+			/**
+			 * @TODO
+			 * wyciecie tekstu
+			 */
+			azimuthText = new TextView(this);
+			azimuthText.setText("TEST");
+			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
+			
+			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
+			addContentView(this.mPreview, lp);	
 		}
 	}
 	
@@ -410,7 +500,6 @@ public class RadarActivity extends AndroidHarness {
 
 	@Override
 	protected void onPause() {
-		Log.d(TAG, "onPause");
 		this.stopPreview = true;
 		super.onPause();		
 		if(this.mCamera != null) {
@@ -432,7 +521,6 @@ public class RadarActivity extends AndroidHarness {
 			this.mCamera.release();
 			this.mCamera = null;
 		}
-		Log.d(TAG, "onDestroy");
 	}
 	
 	public static void yCbCrToRGB565(byte[] yuvs, int width, int height,
@@ -527,5 +615,13 @@ public class RadarActivity extends AndroidHarness {
 			     .setNegativeButton(android.R.string.no, null).show();
 			  }
 		});
+	}
+
+	public SuperimposeJME getApp() {
+		return (SuperimposeJME)app;
+	}
+	
+	public LatLng getTargetPosition() {
+		return this.selectedPosition;
 	}
 }

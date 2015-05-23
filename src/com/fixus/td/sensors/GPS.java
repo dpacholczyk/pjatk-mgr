@@ -13,14 +13,17 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.fixus.td.popup.SettingsPopUp;
+import com.fixus.towerdefense.RadarActivity;
+import com.fixus.towerdefense.model.SuperimposeJME;
+import com.google.android.gms.maps.model.LatLng;
 
 public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
 	private final static String POP_MSG = "GPS is not enabled. Do you want open settings menu?";
 	// The minimum distance to change Updates in meters
-	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters
+	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
 	// The minimum time between updates in milliseconds
-	private static final long MIN_TIME_BW_UPDATES = 1000 * 5; // 5 sec
+	private static final long MIN_TIME_BW_UPDATES = 1000 * 1;
 	private static final String TAG = "GPS";
 	/*
 	 * Jeszcze nie uzywane!! Trzeba obsluzyc te minimalne wartosci, jesli chcemy
@@ -71,14 +74,10 @@ public class GPS extends Service implements LocationListener {
 				}
 
 				reqeustForUpdate();
-//				Log.d(TAG, "GPS req for update");
-//				Log.d(TAG, "GPS " + location);
 			}else{
-//				Log.d(TAG, "GPS brak lokalizacji");
 				showSettingsPopUp();
 			}
 		} catch (Exception e) {
-//			Log.d(TAG, "GPS blad");
 			e.printStackTrace();
 		}
 		return location;
@@ -87,14 +86,11 @@ public class GPS extends Service implements LocationListener {
 	private void reqeustForUpdate() {
 		locationManager.requestLocationUpdates(myBestProvider,
 				MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-
 		if (locationManager != null) {
 			location = locationManager.getLastKnownLocation(myBestProvider);
 			if (location != null) {
 				latitude = location.getLatitude();
-//				Log.d(TAG, "GPS latitude" + latitude);
 				longitude = location.getLongitude();
-//				Log.d(TAG, "GPS longitude" + longitude);
 			}
 		}
 	}
@@ -126,6 +122,30 @@ public class GPS extends Service implements LocationListener {
 		 * albo cos takiego jesli chcemy
 		 */
 		this.location = location;
+
+		SuperimposeJME app = ((RadarActivity)this.mContext).getApp();
+		if(app != null && app.ninja != null) {
+			
+			if(location != null) {
+				Location ninjaLocation = new Location("");
+				LatLng targetPosition = ((RadarActivity)this.mContext).getTargetPosition();
+			
+				if(targetPosition != null) {
+					ninjaLocation.setLatitude(targetPosition.latitude);
+					ninjaLocation.setLongitude(targetPosition.longitude);
+					app.setUserLocation(location, ninjaLocation);
+					Log.d("TEST_GPS", "d: " + location.distanceTo(ninjaLocation));
+				} else {
+					Log.d("TEST_GPS", "null");
+				}
+				
+//				((RadarActivity)this.mContext).azimuthText.setText(location.distanceTo(ninjaLocation) + " | " + test + " | (" + location.toString() + ") | " + ninjaLocation.toString());
+			} else {
+				Log.d("TEST_GPS", "null lokalziacji");
+			}
+		} else {
+			Log.d("TEST_GPS", "duzy null");
+		}
 	}	
 
 	@Override

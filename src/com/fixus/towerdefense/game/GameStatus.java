@@ -16,7 +16,15 @@ public class GameStatus {
 	
 	public static double radius;
 	
-	public static double horizontalViewAngle = 40.0;
+	public static double horizontalViewAngle = 90.0;
+	
+	public static double moveOffset = 5;
+	
+	// próg dystansu.
+	public static double distanceLimit = 15;
+	
+	// próg dystansu. obiekt będzie widziany na dystansie +/- próg
+	public static double distanceOffset = 4;
 	
 	public static List<Location> randomedPoints = new ArrayList<Location>();
 	

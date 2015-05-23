@@ -9,6 +9,8 @@
 
 package com.fixus.towerdefense.model;
 
+import android.location.Location;
+import android.provider.ContactsContract.StatusUpdates;
 import android.util.Log;
 import android.view.View;
 
@@ -59,6 +61,12 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	private boolean mSceneInitialized = false;
 	// A flag indicating if a new Android camera image is available.
 	boolean mNewCameraFrameAvailable = false;
+	
+	private Vector3f mUserPosition;
+	private Vector3f mNinjaPosition;
+	Location locationNinja;
+	public static boolean firstTimeLocation = true;
+	
 
 	private float mForegroundCamFOVY = 50; // for a Samsung Galaxy SII
 	
@@ -69,6 +77,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	private AnimChannel mAniChannel;
 	
 	private boolean newPosition =false;
+	
+	public static final int MOVE_ROTATION = 0;
+	public static final int GPS_ROTATION = 1;
 
 	
   public Spatial ninja;
@@ -102,9 +113,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	
 	private TouchListener oTouch = new TouchListener() {
 		public void onTouch(String name, TouchEvent event, float tpf) {			
-			Log.d(TAG, TouchEvent.Type.TAP + "");
 			if (event.getType() == TouchEvent.Type.TAP) {
-				Log.d(TAG, "tap");
 				
 		        CollisionResults results = new CollisionResults();
 		        // Convert screen click to 3d position
@@ -117,14 +126,10 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		        rootNode.collideWith(ray, results);
 		        
 		        if (results.size() > 0) {
-		        	Log.d(TAG, "wow");
 		        	if (results.getClosestCollision()!=null) {
-						Log.d(TAG, results.getClosestCollision().getGeometry().getName());
 						RadarActivity.messageDialog(results.getClosestCollision().getGeometry().getName());
 					}
-		        }else{
-					Log.d(TAG, ":(");
-				}
+		        }
 		        
 		        /*Ray oray = new Ray(new Vector3f(event.getX()-1, event.getY()-1, 0.0f),new Vector3f(event.getX(), event.getY(), ninja.getWorldScale().z));
 				CollisionResults results = new CollisionResults();
@@ -173,6 +178,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		// pixels.
 		mCameraTexture = new Texture2D();
 
+		mUserPosition=new Vector3f();
+		mNinjaPosition=new Vector3f();
+		locationNinja = new Location("");
 		
 		mSceneInitialized = true;
 	}
@@ -203,7 +211,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         // rotacja odbywa się tak, że 0 to znaczy skierowane na wprost zgodnie z tym jak sie patrzy przez kamere
         // obrot np. 90 stopni oznacza obrot w lewo
         ninja.rotate(0.0f, (float)Math.toRadians(0.0), 0.0f);
-        ninja.setLocalTranslation(0.0f, -2.5f, 0.0f);
+        ninja.setLocalTranslation(0.0f, -2.5f, -15.0f);
         rootNode.attachChild(ninja);
         
         // You must add a light to make the model visible
@@ -215,21 +223,38 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         mAniControl.addListener(this);
         mAniChannel = mAniControl.createChannel();
         // show animation from beginning
-        mAniChannel.setAnim("Walk");
-        mAniChannel.setLoopMode(LoopMode.Loop);
-        mAniChannel.setSpeed(1f);
+//        mAniChannel.setAnim("Walk");
+//        mAniChannel.setLoopMode(LoopMode.Loop);
+//        mAniChannel.setSpeed(1f);
         
         ninja.setCullHint(CullHint.Always);
 	}
 	
 	private float newX, newY, newZ;
+	private float mX, mY, mZ;
+	private boolean rotationMove = false;
+	private boolean gpsMove = false;
+	public static int mode;
 	
 	public void rotate(float x, float y, float z) {
-//		Log.d(TAG, "simpleUpdate: Nowa rotacja: " + y);
 		newX = x;
 		newY = y;
 		newZ = z;
 		newPosition = true;
+	}
+	
+	public void move(float x, float y, float z) {
+		mX = x;
+		mY = y;
+		mZ = z;
+		
+		rotationMove = true;
+	}
+	
+	public void moveX(float x) {
+		mX = x;
+		
+		rotationMove = true;
 	}
 	
 	public void rotateCamera(float x, float y, float z) {
@@ -270,6 +295,84 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		mCameraImage = image;
 		mNewCameraFrameAvailable = true;
 	}
+	
+
+	
+    private void WSG84toECEF(Location loc, Vector3f position) {
+    	
+    	double WGS84_A=6378137.0;           // WGS 84 semi-major axis constant in meters
+
+    	double WGS84_E=0.081819190842622;   // WGS 84 eccentricity
+
+    	double lat=(float) Math.toRadians(loc.getLatitude());
+    	double lon=(float) Math.toRadians(loc.getLongitude());
+    	
+    	double clat=Math.cos(lat);
+    	double slat=Math.sin(lat);
+    	double clon=Math.cos(lon);
+    	double slon=Math.sin(lon);
+
+    	double N=WGS84_A / Math.sqrt(1.0 - WGS84_E * WGS84_E * slat * slat);
+
+    	double x = N*clat*clon;
+    	double y = N*clat*slon;
+    	double z = (N * (1.0 - WGS84_E * WGS84_E)) * slat;
+        
+        position.set((float)x,(float)y,(float)z);
+    }
+    
+    private void ECEFtoENU(Location loc, Vector3f cameraPosition, Vector3f poiPosition, Vector3f enuPOIPosition) {
+    	double lat=(float) Math.toRadians(loc.getLatitude());
+    	double lon=(float) Math.toRadians(loc.getLongitude());
+    	
+    	double clat=Math.cos(lat);
+    	double slat=Math.sin(lat);
+    	double clon=Math.cos(lon);
+    	double slon=Math.sin(lon);
+
+        double dx = cameraPosition.x - poiPosition.x;
+
+        double dy = cameraPosition.y - poiPosition.y;
+
+        double dz = cameraPosition.z - poiPosition.z;
+
+        double e = -slon*dx  + clon*dy;
+
+        double n = -slat*clon*dx - slat*slon*dy + clat*dz;
+
+        double u = clat*clon*dx + clat*slon*dy + slat*dz;
+        
+        enuPOIPosition.set((float)e,(float)n,(float)u);
+    }
+    
+	public String setUserLocation(Location location, Location locationNinja) {
+		if (!mSceneInitialized) {
+			return null;
+		}
+		WSG84toECEF(location, mUserPosition);
+		
+		Vector3f ECEFNinja=new Vector3f();
+		Vector3f ENUNinja=new Vector3f();
+		
+		if(location == null) {
+			return null;
+		}
+
+		WSG84toECEF(locationNinja, ECEFNinja);
+
+		ECEFtoENU(locationNinja,mUserPosition,ECEFNinja,ENUNinja);
+		//x=east,y=north,z=up
+		mNinjaPosition.set(ENUNinja.x,0,ENUNinja.y);
+		Log.d("GPS","Ninja Pos="+mNinjaPosition.toString());
+		Log.d("GPS", "Dystans do: " + location.distanceTo(locationNinja));
+		
+		gpsMove = true;
+		mode = 1;
+		
+		Log.d("GPS", "setUserLocation");
+		
+		return mNinjaPosition.toString();
+	}
 
 	@Override
 	public void simpleUpdate(float tpf) {
@@ -279,11 +382,32 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		}
 
 		if(newPosition && ninja != null) {
-//			Log.d(TAG, "simpleUpdate: rotacja: " + newY + " | " + (float)Math.toRadians(newY));
 			ninja.rotate((float)Math.toRadians(newX), (float)Math.toRadians(newY), (float)Math.toRadians(newZ));
 			newPosition = false;
 		}
-		
+
+		if((rotationMove && ninja != null) || (gpsMove && ninja != null)) {
+			Vector3f currentTranslation = ninja.getLocalTranslation();
+			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+//			ninja.setLocalTranslation(mX, mY, mZ);
+//			rotationMove = false;
+			if(gpsMove) {
+				gpsMove = false;
+			}
+			if(rotationMove) {
+				rotationMove = false;
+ 			}
+			Log.d("TEST_GPS", mNinjaPosition.x +  " | " + mNinjaPosition.y + " | " + (mNinjaPosition.z+32) * -1);
+		}
+//		if(gpsMove && ninja != null) {
+//			Vector3f currentTranslation = ninja.getLocalTranslation();
+//			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z+2) * -1);
+////			ninja.setLocalTranslation(0 ,mNinjaPosition.y-2.5f,(mNinjaPosition.z+2) * -1);
+//			Log.d("TEST_GPS", mX +  " | " + mNinjaPosition.y + " | " + (mNinjaPosition.z+2) * -1);
+//	
+//			gpsMove = false;
+//		}
+				
 		mVideoBGGeom.updateLogicalState(tpf);
 		mVideoBGGeom.updateGeometricState();
 	}

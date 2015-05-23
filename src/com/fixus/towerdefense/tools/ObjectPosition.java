@@ -1,5 +1,7 @@
 package com.fixus.towerdefense.tools;
 
+import com.fixus.towerdefense.game.GameStatus;
+
 import android.location.Location;
 import android.util.Log;
 
@@ -32,17 +34,18 @@ public class ObjectPosition extends Position {
 		double halfAngle = viewAngle / 2;
 		double topLimit = personAzimuth + halfAngle;
 		double bottomLimit = personAzimuth - halfAngle;
-		Log.d(TAG, "halfAngle: " + halfAngle);
-		Log.d(TAG, "topLimit before: " + topLimit);
-		Log.d(TAG, "bottomLimit before: " + bottomLimit);
 		if(topLimit >= 360) {
 			topLimit -= 360;
 		}
 		if(bottomLimit < 0) {
 			bottomLimit += 360;
 		}
-		Log.d(TAG, "topLimit after: " + topLimit);
-		Log.d(TAG, "bottomLimit after: " + bottomLimit);
+		
+		Log.d("SEEN", "personAzimuth: " + personAzimuth);
+		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
+		Log.d("SEEN", "topLimit: " + topLimit);
+		Log.d("SEEN", "bottomLimit: " + bottomLimit);
+		
 		// warunek który sprawdza czy zakresy nie są w w przeciwstawnych ćwiartkach. Jesli tak to należy sprawdzić dwa zakresy
 		if(topLimit >= 0 && (bottomLimit >= 270 && bottomLimit < 360)) {
 			if((this.azimuth >= 0 && this.azimuth < topLimit) || (this.azimuth < 360 && this.azimuth >= bottomLimit)) {
@@ -54,5 +57,20 @@ public class ObjectPosition extends Position {
 		}
 		
 		return false;
+	}
+
+	public boolean inDistance(double distance) {
+		if(distance <= (GameStatus.distanceLimit + GameStatus.distanceOffset) && distance >= (GameStatus.distanceLimit - GameStatus.distanceOffset)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public float countObjectPosition(double personAzimuth, double viewAngle) {
+		float moveOffset = (float)(viewAngle/10);
+		// kolejność odejmowania jest ważna. 
+		// jeśli będzie zła kolejność to kierunek przesunięcie będzie odwrotny 
+		return (float)( ((this.azimuth - personAzimuth) / moveOffset) );
 	}
 }

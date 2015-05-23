@@ -15,6 +15,8 @@ public class Compas {
 	public static final String EAST = "E";
 	public static final String WEST = "W";
 	
+	public static final float ALPHA = 0.15f;
+	
 	public static float getAzimut(float[] accelerometerMatrix,float[] magneticMatrix){
 		if (accelerometerMatrix != null && magneticMatrix != null) {
 	      float R[] = new float[9];
@@ -33,7 +35,7 @@ public class Compas {
 	
 	public static float getAzimuthInDegress(float fAzimuth,boolean isLandscape){
 		float azimuthInDegress = (float)Math.toDegrees(fAzimuth);
-		//jak telefon jest trzymany poziomo nalezy uwzglednic przesuniêcie o 90 stopni
+		//jak telefon jest trzymany poziomo nalezy uwzglednic przesuniï¿½cie o 90 stopni
 		float landscapeRotation = isLandscape ? 90f : 0f;
 		if (azimuthInDegress < 0.0f) {
 		    azimuthInDegress += 360.0f;
