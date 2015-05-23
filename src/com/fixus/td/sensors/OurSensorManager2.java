@@ -22,13 +22,17 @@ public class OurSensorManager2 implements SensorEventListener{
 	private SensorManager sensorManager;
 	/*
 	 * Integer jest id sensora z enuma np Sensor.TYPE_ACCELEROMETER
-	 * Druga Paira to:
-	 * 
-	 * sensor sam w sobie i kolejna Paira
-	 * -limit danych dla mediany
-	 * -precyzja w ktorej dane sa zapisane
+	 * 	Wartosci mapy jest para:
+	 *	- sensor sam w sobie i kolejna para
+	 * 		-limit danych dla mediany
+	 * 		-precyzja w ktorej dane sa zapisane
 	 */
 	private Map<Integer,Pair<Sensor,Pair<Integer,Integer>>> cSensorList;
+	/*
+	 * Integer jest id sensora z enuma np Sensor.TYPE_ACCELEROMETER
+	 * Wartosci mapy jest kolejka, z ostatnimi wynikami. Dlugosc kolejki
+	 * zalezy od wartosci limitera z obiektu cSensorList
+	 */
 	private Map<Integer,Queue<Float[]>> cSensorLastValues;
 
 	public OurSensorManager2(Context context) {
@@ -55,8 +59,11 @@ public class OurSensorManager2 implements SensorEventListener{
 		 * po czym wyswietlenie info, ze na tym urzadzeniu nie pograsz sobie w ta gierke
 		 */
 		Sensor oSensor = sensorManager.getDefaultSensor(iSensorId);
+		//rejestracja dangeo sensora
 		sensorManager.registerListener(this, oSensor, SensorManager.SENSOR_DELAY_UI);
+		//utworzenie pary limiterow (limit liczby ostatnich wynikow, precyzje przechowywanych wynikow)
 		Pair<Integer,Integer> oPairLimiters = new Pair<Integer,Integer>(iNumberOfResultsForMedian,iPrecision);
+		//id sensora i jego limitery
 		Pair<Sensor,Pair<Integer,Integer>> oSingelSensor = new Pair<Sensor,Pair<Integer,Integer>>(oSensor, oPairLimiters);
 		cSensorList.put(iSensorId, oSingelSensor);
 	}
@@ -92,10 +99,13 @@ public class OurSensorManager2 implements SensorEventListener{
 					cOfZ.add(aResults[2]);
 				}
 			}
+			//majac listy osatnich wynikow kolejno dla x,y,z wyliczamy z nich mediane
+			//poczym zwracamy tablice 3 median
 			arrayToReturn.add(getMedian(cOfX.toArray(new Float[0]), 0));
 			arrayToReturn.add(getMedian(cOfY.toArray(new Float[0]), 0));
 			arrayToReturn.add(getMedian(cOfZ.toArray(new Float[0]), 0));
 		}else{
+			//zadany sensor nieistnieje
 			arrayToReturn.add(0.0f);
 			arrayToReturn.add(0.0f);
 			arrayToReturn.add(0.0f);
@@ -139,12 +149,14 @@ public class OurSensorManager2 implements SensorEventListener{
 		 */
 		Pair<Integer,Integer> oSensorLimiters = oSingelSensor.second;
 		iNumberOfResultsForMedian = oSensorLimiters.first;
-		
+		//pobranie/utworzenie kolejki osatnich wynikow
 		Queue<Float[]> oQue = cSensorLastValues.containsKey(event.sensor.getType()) ? 
 				cSensorLastValues.get(event.sensor.getType()):
 				new LinkedList<Float[]>();
+		//pobranie informacji odnosnie nowych wartosci danego sensora		
 		Float[] oLastValues = getFloatMatrixWithPrecision(event.values, iPrecison);
-		
+		//jesli kolejka ma juz rozmiar wiekszy albo rowny docelowemu rozmiarowi
+		//trzeba usunac elemetn tak by maksymalny rozmiar kolejki zostal zachowany
 		if(oQue.size() >= iNumberOfResultsForMedian){
 			oQue.poll();
 		}
@@ -153,7 +165,13 @@ public class OurSensorManager2 implements SensorEventListener{
 		
 		cSensorLastValues.put(event.sensor.getType(), oQue);
 	}
-	
+	/**
+	 * Zmienia precyzje float, do podanej liczby miejsc po przecinku
+	 * 
+	 * @param oLastResult Oryginalna tablica z floatami
+	 * @param iPrecision Liczba miejsc po przecinku
+	 * @return
+	 */
 	private Float[] getFloatMatrixWithPrecision(float[] oLastResult, int iPrecision){
 		List<Float> arrayToReturn = new ArrayList<Float>();
 		for(int i = 0; i < oLastResult.length;++i){
@@ -164,7 +182,13 @@ public class OurSensorManager2 implements SensorEventListener{
 		}	
 		return arrayToReturn.toArray(new Float[0]);
 	}
-	
+	/**
+	 * Liczy mediane dla tablicy floatow i zwraca ja z odpowiednia precyzja
+	 * 
+	 * @param oTmp
+	 * @param iPrecision
+	 * @return
+	 */
 	private Float getMedian(Float[] oTmp,int iPrecision){
 		if(oTmp.length == 0){
 		 return 0.0f;
@@ -181,6 +205,12 @@ public class OurSensorManager2 implements SensorEventListener{
 		}
 	}
 	
+	/**
+	 * Zamienia tablice obiektow typu Float na prymitywy typo float
+	 * 
+	 * @param oList
+	 * @return
+	 */
 	private float[] fromFloatArrayToPrimitiveArray(List<Float> oList){
 	   	float[] oReturn = new float[oList.size()];
 	   	int i = 0;
