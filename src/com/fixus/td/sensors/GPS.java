@@ -135,16 +135,8 @@ public class GPS extends Service implements LocationListener {
 					ninjaLocation.setLongitude(targetPosition.longitude);
 					app.setUserLocation(location, ninjaLocation);
 					Log.d("TEST_GPS", "d: " + location.distanceTo(ninjaLocation));
-				} else {
-					Log.d("TEST_GPS", "null");
 				}
-				
-//				((RadarActivity)this.mContext).azimuthText.setText(location.distanceTo(ninjaLocation) + " | " + test + " | (" + location.toString() + ") | " + ninjaLocation.toString());
-			} else {
-				Log.d("TEST_GPS", "null lokalziacji");
 			}
-		} else {
-			Log.d("TEST_GPS", "duzy null");
 		}
 	}	
 

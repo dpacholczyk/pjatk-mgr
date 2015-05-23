@@ -388,7 +388,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 
 		if((rotationMove && ninja != null) || (gpsMove && ninja != null)) {
 			Vector3f currentTranslation = ninja.getLocalTranslation();
-			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f,(mNinjaPosition.z) * -1);
 //			ninja.setLocalTranslation(mX, mY, mZ);
 //			rotationMove = false;
 			if(gpsMove) {
