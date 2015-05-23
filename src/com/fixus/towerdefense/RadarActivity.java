@@ -89,8 +89,8 @@ public class RadarActivity extends AndroidHarness {
 			RadarActivity.this.debugText = "";
 			if (c != null && stopPreview == false) {
 				azimut = Compas.getAzimut(
-						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0),
-						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD,0)
+						sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER),
+						sensorManager.getLastMatrix(Sensor.TYPE_MAGNETIC_FIELD)
 				);
 				RadarActivity.this.debugText += " | az: " + azimut;
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
@@ -148,7 +148,7 @@ public class RadarActivity extends AndroidHarness {
 //					fromLocation.setLatitude(52.109766);
 //					fromLocation.setLongitude(21.044573);
 				}
-				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER, 5);
+				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
 				
 				/**
 				 * @TODO
@@ -411,8 +411,8 @@ public class RadarActivity extends AndroidHarness {
 		this.cTools = new CameraTool();
 		
 		sensorManager = new OurSensorManager2(this);
-		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER);
-		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD);	
+		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER,10,0);
+		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD,10,0);	
 		
 	    gps = new GPS(this);
 	    if(!gps.canGetLocation()){
