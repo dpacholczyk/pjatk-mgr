@@ -207,16 +207,15 @@ public class RadarActivity extends AndroidHarness {
 //					if(!object.inDistance(distance)) {
 //						show = false;
 //					}
-					Log.d("SHOW", "" + frameLimiter);
+					Log.d("SHOW", "show: " + show);
 					if(frameLimiter >= azimuthLimiter) {
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							float newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
+						}
+						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
 						}
-//						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(true);
-//						}
 					}
 
 //				}
