@@ -20,6 +20,7 @@ import android.util.Pair;
 @SuppressLint("UseSparseArrays")
 public class OurSensorManager2 implements SensorEventListener{
 	private SensorManager sensorManager;
+	private int iSensorWorkMode = SensorManager.SENSOR_DELAY_GAME;
 	/*
 	 * Integer jest id sensora z enuma np Sensor.TYPE_ACCELEROMETER
 	 * 	Wartosci mapy jest para:
@@ -60,7 +61,7 @@ public class OurSensorManager2 implements SensorEventListener{
 		 */
 		Sensor oSensor = sensorManager.getDefaultSensor(iSensorId);
 		//rejestracja dangeo sensora
-		sensorManager.registerListener(this, oSensor, SensorManager.SENSOR_DELAY_UI);
+		sensorManager.registerListener(this, oSensor, iSensorWorkMode);
 		//utworzenie pary limiterow (limit liczby ostatnich wynikow, precyzje przechowywanych wynikow)
 		Pair<Integer,Integer> oPairLimiters = new Pair<Integer,Integer>(iNumberOfResultsForMedian,iPrecision);
 		//id sensora i jego limitery
@@ -124,7 +125,7 @@ public class OurSensorManager2 implements SensorEventListener{
 	    //Po przywrocenie wznawiamy aktualizaowanie danych
 		if(!cSensorList.isEmpty()){
 			for(Pair <Sensor,Pair<Integer,Integer>> oSingeSensorWithLimiters : cSensorList.values()){
-				sensorManager.registerListener(this, oSingeSensorWithLimiters.first, SensorManager.SENSOR_DELAY_UI);
+				sensorManager.registerListener(this, oSingeSensorWithLimiters.first, iSensorWorkMode);
 			}
 		}
 	}	

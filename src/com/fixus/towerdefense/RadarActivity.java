@@ -1,5 +1,6 @@
 package com.fixus.towerdefense;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fixus.td.sensors.GPS;
+import com.fixus.td.sensors.KalmanLatLong;
 import com.fixus.td.sensors.OurSensorManager2;
 import com.fixus.towerdefense.camera.CameraPreview;
 import com.fixus.towerdefense.camera.CameraTool;
@@ -59,6 +61,8 @@ public class RadarActivity extends AndroidHarness {
 	private float lastFullRoll = 0f;
 	private ImageView compassNeedle;
 	private int posX = 0;
+	
+	private KalmanLatLong oSmoothGPS;
 	
 	protected LatLng selectedPosition = null;
 	protected float rollAvg = 0f;
@@ -125,9 +129,17 @@ public class RadarActivity extends AndroidHarness {
 				 */				
 				//tu ustawiamy nasza lokazliazacje
 				Location fromLocation = new Location("");
+				Location gpsLocation = new Location("");
 				if(gps != null && gps.getLocation() != null){
-					fromLocation = gps.getLocation();
-					
+					gpsLocation = gps.getLocation();
+					oSmoothGPS.Process(gpsLocation.getLatitude(), gpsLocation.getLongitude(), 
+							gpsLocation.getAccuracy(), System.currentTimeMillis());
+					fromLocation = new Location("");
+					fromLocation.setLatitude(oSmoothGPS.getLatitude());
+					fromLocation.setLongitude(oSmoothGPS.getLongitude());
+					azimuthText.setText("1)" + gpsLocation.getLatitude() + " " + gpsLocation.getLongitude()+
+									  "\n2)" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude() +
+									  "\n3)52.133117 20.665808");
 				}else{
 					
 					//52.133340, 20.666227
@@ -173,9 +185,9 @@ public class RadarActivity extends AndroidHarness {
 						GameStatus.phone = phone;
 					}
 				}				
-
-				double tmpLat = 52.107821;
-				double tmpLng = 21.042726;
+				//52.133117, 20.665808
+				double tmpLat = 52.133117;
+				double tmpLng = 20.665808;
 				
 				//tu jest lokalizacja do ktorej zmierzamy
 				Location targetLocation = new Location("");
@@ -202,6 +214,7 @@ public class RadarActivity extends AndroidHarness {
 					 * to oczywiśćie tmp. obiekt nie może być tworzony w każdej klatce
 					 */
 					ObjectPosition object = new ObjectPosition();
+					azimuthText.setText(azimuthText.getText() + "\n" + azimuthInDegress2 + "\n " + getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
 					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
 					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //					if(!object.inDistance(distance)) {
@@ -211,7 +224,7 @@ public class RadarActivity extends AndroidHarness {
 					if(frameLimiter >= azimuthLimiter) {
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							float newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
+							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
 						}
 						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
@@ -303,7 +316,7 @@ public class RadarActivity extends AndroidHarness {
 	    		targetLocation.getLatitude(),
 	    		targetLocation.getLongitude()
 	    		);
-		return (-(azimuth - directionInDegress));
+		return new BigDecimal((-(azimuth - directionInDegress))).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 	
 	/*
@@ -386,9 +399,11 @@ public class RadarActivity extends AndroidHarness {
 		
 		sensorManager = new OurSensorManager2(this);
 		sensorManager.addSensor(Sensor.TYPE_ACCELEROMETER,10,0);
-		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD,10,0);	
+		sensorManager.addSensor(Sensor.TYPE_MAGNETIC_FIELD,65,0);	
 		
 	    gps = new GPS(this);
+	    oSmoothGPS = new KalmanLatLong(4,5);
+	    
 	    if(!gps.canGetLocation()){
 	    	gps.showSettingsPopUp();
 	    }
@@ -442,10 +457,9 @@ public class RadarActivity extends AndroidHarness {
 			 * @TODO
 			 * wyciecie tekstu
 			 */
-//			azimuthText = new TextView(this);
-//			azimuthText.setText("TEST");
-//			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
-			posButton = new Button(this);
+			azimuthText = new TextView(this);
+			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
+			/*posButton = new Button(this);
 			posButton.setText("pos -1");
 			posButton.setOnClickListener(new OnClickListener() {
 				
@@ -457,7 +471,7 @@ public class RadarActivity extends AndroidHarness {
 					
 				}
 			});
-			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));
+			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));*/
 			
 			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
 			addContentView(this.mPreview, lp);	

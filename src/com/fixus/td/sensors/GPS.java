@@ -21,14 +21,9 @@ public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
 	private final static String POP_MSG = "GPS is not enabled. Do you want open settings menu?";
 	// The minimum distance to change Updates in meters
-	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
+	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 2;
 	// The minimum time between updates in milliseconds
-	private static final long MIN_TIME_BW_UPDATES = 1000 * 1;
-	private static final String TAG = "GPS";
-	/*
-	 * Jeszcze nie uzywane!! Trzeba obsluzyc te minimalne wartosci, jesli chcemy
-	 * a uwazam ze chyba warto
-	 */
+	private static final long MIN_TIME_BW_UPDATES = 1500;
 	
 	private final Context mContext;
 	private final Criteria criteria;
@@ -38,6 +33,7 @@ public class GPS extends Service implements LocationListener {
 	private Location location;
 	private double latitude;
 	private double longitude;
+	private double accuracy;
 	protected LocationManager locationManager;
 
 	public GPS(Context context) {
@@ -56,8 +52,8 @@ public class GPS extends Service implements LocationListener {
 		//pobieramy pierwsza lokalizacje(a dokladnie wysylamy request, w celu jej uzyskania)
 		getLocation();
 		
-		criteria.setAccuracy(Criteria.ACCURACY_FINE);
-	    criteria.setPowerRequirement(Criteria.POWER_HIGH);
+		criteria.setAccuracy(Criteria.ACCURACY_MEDIUM);
+	    criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
 	}
 
 	public Location getLocation() {
@@ -91,6 +87,7 @@ public class GPS extends Service implements LocationListener {
 			if (location != null) {
 				latitude = location.getLatitude();
 				longitude = location.getLongitude();
+				accuracy = location.getAccuracy();
 			}
 		}
 	}
@@ -103,6 +100,11 @@ public class GPS extends Service implements LocationListener {
 	public double getLongitude() {
 		return (location != null) ? longitude = location.getLongitude()
 				: longitude;
+	}
+	
+	public double getAccuracy() {
+		return (location != null) ? accuracy = location.getAccuracy()
+				: accuracy;
 	}
 
 	public boolean canGetLocation() {
