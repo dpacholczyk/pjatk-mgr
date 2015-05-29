@@ -17,7 +17,6 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -69,7 +68,8 @@ public class LocatorActivity extends FragmentActivity {
 						    .radius(GameStatus.getRadiusInMeters()); // In meters
 
 						// Get back the mutable Circle
-						Circle circle = this.googleMap.addCircle(circleOptions);
+						//Circle circle = 
+						this.googleMap.addCircle(circleOptions);
 						
 //						Log.d(TAG, "ilosc randomowych: " + GameStatus.randomedPoints.size());
 //						Log.d(TAG, "game points: " + GameStatus.points);
@@ -78,12 +78,13 @@ public class LocatorActivity extends FragmentActivity {
 						 * @TODO - sprawdzić czy da się ustalić czy wskazany losowy punkt jest ulicą (dostępny)
 						 * jeśli nie wylosować jeszcze raz
 						 */
-						if(GameStatus.randomedPoints.size() == 0) {
-//							Log.d(TAG, "Biorę z points");
-							this.addRandomPoints(GameStatus.points);
-						} else {
+						if(GameStatus.getLocationsList().size() != 0) {
 //							Log.d(TAG, "Biore z size");
-							this.addRandomPoints(GameStatus.randomedPoints);
+							this.addRandomPoints(GameStatus.getLocationsList());
+						} else {
+							Log.d(TAG, "Biorę z points");
+							this.addRandomPoints(GameStatus.getNUMBER_OF_POINTS_TO_FIND());
+//							
 						}
 						this.googleMap.setOnMarkerClickListener(new OnMarkerClickListener() {
 							
@@ -118,9 +119,9 @@ public class LocatorActivity extends FragmentActivity {
 		for(int i = 0; i < pointsCount; i++) {
 			Location randomPoint = MapPoint.getLocation(this.gps.getLocation(), GameStatus.getRadiusInMeters());
 			
-			Log.d(TAG, "Dodaje punkt: " + i);
-//			Log.d(TAG, "losowy punkt : " + randomPoint.getLatitude() + " | " + randomPoint.getLongitude());
-			
+			//Log.d(TAG, "Dodaje punkt: " + i);
+			//Log.d(TAG, "losowy punkt : " + randomPoint.getLatitude() + " | " + randomPoint.getLongitude());
+			GameStatus.addLocation(randomPoint);
 			this.googleMap.addMarker(new MarkerOptions()
 	        .position(new LatLng(randomPoint.getLatitude(), randomPoint.getLongitude()))
 	        .title("Random point: " + (i + 1)));

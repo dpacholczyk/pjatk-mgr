@@ -258,11 +258,11 @@ public class RadarActivity extends AndroidHarness {
 				 * @TODO
 				 * przywrocic sprawdzanie czy lezy plasko w celu zmiany widoku
 				 */
-//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
-//					stopPreview = true;
-//					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-//					startActivity(i);	
-//				}
+				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER)[0], 0)) {
+					stopPreview = true;
+					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+					startActivity(i);	
+				}
 				
 				if(lastAzimuth != azimuthInDegress) {
 					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
@@ -388,7 +388,7 @@ public class RadarActivity extends AndroidHarness {
   	  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
   		}
   		if(intent.hasExtra(Second.POINTS)) {
-  	  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
+  	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(Second.POINTS, 0));
   		}
   		if(intent.hasExtra("selectedLat")) {
   			double tmpLat = intent.getDoubleExtra("selectedLat", 0);
@@ -407,11 +407,11 @@ public class RadarActivity extends AndroidHarness {
 	    if(!gps.canGetLocation()){
 	    	gps.showSettingsPopUp();
 	    }
-	    if(this.gps != null) {
+	    /*if(this.gps != null) {
 			if(this.gps.getLocation() != null) {
 				GameStatus.randomedPoints = MapPoint.generatePoints(this.gps.getLocation(), GameStatus.getRadiusInMeters(), GameStatus.points);
 			}
-	    }
+	    }*/
 	    this.debugText = "";
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
 	}

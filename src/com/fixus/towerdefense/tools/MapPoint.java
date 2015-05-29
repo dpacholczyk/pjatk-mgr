@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import android.location.Location;
-import android.util.Log;
 
 public class MapPoint {
 	public static final String TAG = "TD_MAPPOINT";

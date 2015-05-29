@@ -124,21 +124,27 @@ public class GPS extends Service implements LocationListener {
 		 * albo cos takiego jesli chcemy
 		 */
 		this.location = location;
-
-		SuperimposeJME app = ((RadarActivity)this.mContext).getApp();
-		if(app != null && app.ninja != null) {
-			
-			if(location != null) {
-				Location ninjaLocation = new Location("");
-				LatLng targetPosition = ((RadarActivity)this.mContext).getTargetPosition();
-			
-				if(targetPosition != null) {
-					ninjaLocation.setLatitude(targetPosition.latitude);
-					ninjaLocation.setLongitude(targetPosition.longitude);
-					app.setUserLocation(location, ninjaLocation);
-					Log.d("TEST_GPS", "d: " + location.distanceTo(ninjaLocation));
+		try{
+			SuperimposeJME app = null;
+			if(this.mContext instanceof RadarActivity){
+				app = ((RadarActivity)this.mContext).getApp();
+			}
+			if(app != null && app.ninja != null) {
+				
+				if(location != null) {
+					Location ninjaLocation = new Location("");
+					LatLng targetPosition = ((RadarActivity)this.mContext).getTargetPosition();
+				
+					if(targetPosition != null) {
+						ninjaLocation.setLatitude(targetPosition.latitude);
+						ninjaLocation.setLongitude(targetPosition.longitude);
+						app.setUserLocation(location, ninjaLocation);
+						Log.d("TEST_GPS", "d: " + location.distanceTo(ninjaLocation));
+					}
 				}
 			}
+		}catch(Exception ex){
+			//so stupido...
 		}
 	}	
 
