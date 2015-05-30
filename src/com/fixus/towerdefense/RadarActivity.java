@@ -17,6 +17,7 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,7 +48,7 @@ import com.jme3.texture.Image;
 public class RadarActivity extends AndroidHarness {
 	private static final String TAG = "TD_RADARACTIVITY";
 	
-	private static RadarActivity oTest;
+	private static RadarActivity STATIC_THIS;
 	
 	private Camera mCamera;
 	private CameraPreview mPreview;
@@ -64,7 +65,8 @@ public class RadarActivity extends AndroidHarness {
 	
 	private KalmanLatLong oSmoothGPS;
 	
-	protected LatLng selectedPosition = null;
+	//protected LatLng selectedPosition = null;
+	private Location targetLocation = new Location("");
 	protected float rollAvg = 0f;
 	protected int rollAvgCounter = 32;
 	
@@ -202,7 +204,7 @@ public class RadarActivity extends AndroidHarness {
 				double tmpLng = 21.060323;
 				
 				//tu jest lokalizacja do ktorej zmierzamy
-				Location targetLocation = new Location("");
+				//Location targetLocation = new Location("");
 				// altanka
 			    targetLocation.setLatitude(52.107814);
 			    targetLocation.setLongitude(21.042722);
@@ -211,6 +213,9 @@ public class RadarActivity extends AndroidHarness {
 //			    targetLocation.setLatitude(tmpLat);
 //			    targetLocation.setLongitude(tmpLng);
 //			    RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
+			    //targetLocation.setLatitude(tmpLat);
+			    //targetLocation.setLongitude(tmpLng);
+			    //RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
 			    //a to ustawi odpowiednio strzalke
 			    /**
 			     * @TODO przywrocic if
@@ -304,11 +309,9 @@ public class RadarActivity extends AndroidHarness {
 				 * @TODO
 				 * przywrocic sprawdzanie czy lezy plasko w celu zmiany widoku
 				 */
-//				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER,0)[0], 0)) {
-//					stopPreview = true;
-//					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-//					startActivity(i);	
-//				}
+				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER)[0], 0)) {
+					openLocatorActivity();
+				}
 				
 				if(lastAzimuth != azimuthInDegress) {
 					if ((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
@@ -400,8 +403,8 @@ public class RadarActivity extends AndroidHarness {
 	}
 
 	public RadarActivity() {
-		if(oTest == null){
-			oTest = this;
+		if(STATIC_THIS == null){
+			STATIC_THIS = this;
 		}
 		// Set the application class to run
 		// appClass = "mygame.Main";
@@ -434,12 +437,17 @@ public class RadarActivity extends AndroidHarness {
   	  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
   		}
   		if(intent.hasExtra(Second.POINTS)) {
-  	  		GameStatus.points = intent.getIntExtra(Second.POINTS, 0);
+  	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(Second.POINTS, 0));
   		}
   		if(intent.hasExtra("selectedLat")) {
-  			double tmpLat = intent.getDoubleExtra("selectedLat", 0);
-  			double tmpLng = intent.getDoubleExtra("selectedLng", 0);
-  			this.selectedPosition = new LatLng(tmpLat, tmpLng);
+  			/*
+  			 * Pobieramy informacje o aktualnym target point
+  			 */
+  			double tmpLat = intent.getDoubleExtra(LocatorActivity.INTENT_LAT_ID, 0);
+  			double tmpLng = intent.getDoubleExtra(LocatorActivity.INTENT_LONG_ID, 0);
+  			//this.selectedPosition = new LatLng(tmpLat, tmpLng);
+  			this.targetLocation.setLatitude(tmpLat);
+  			this.targetLocation.setLongitude(tmpLng);
   		}
 		this.cTools = new CameraTool();
 		
@@ -453,11 +461,11 @@ public class RadarActivity extends AndroidHarness {
 	    if(!gps.canGetLocation()){
 	    	gps.showSettingsPopUp();
 	    }
-	    if(this.gps != null) {
+	    /*if(this.gps != null) {
 			if(this.gps.getLocation() != null) {
 				GameStatus.randomedPoints = MapPoint.generatePoints(this.gps.getLocation(), GameStatus.getRadiusInMeters(), GameStatus.points);
 			}
-	    }
+	    }*/
 	    this.debugText = "";
 	    l = (LinearLayout) findViewById(R.layout.activity_radar);
 	}
@@ -654,20 +662,41 @@ public class RadarActivity extends AndroidHarness {
 	}
 	
 	public static void messageDialog(final String text){
-		oTest.runOnUiThread(new Runnable() {
+		STATIC_THIS.runOnUiThread(new Runnable() {
 			  public void run() {
-			    //Toast.makeText(oTest, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
-			    
-			    new AlertDialog.Builder(oTest)
+			    //Toast.makeText(STATIC_THIS, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
+			    //w tym miejscu obiekt jest oznaczany jako zebrany
+	        	GameStatus.markCurrentPointAsFound();
+	        	
+	        	/*
+	        	 * Dawid - tu wstaw kod umozliwiajacy schowanie obiektu
+	        	 */
+	        	
+	        	//toast z wiadomoscia o podniesieniu obiektu
+	        	Toast.makeText(STATIC_THIS, "Object: " + text + " is picked up", Toast.LENGTH_SHORT).show();
+	        	
+	        	//Po 5 sekundach przenies na widok map w celu wybrania kolejnego pkt
+	        	new CountDownTimer(5000, 1000) {
+
+	        	     public void onTick(long millisUntilFinished) {
+	        	         //nic nie rob
+	        	     }
+
+	        	     public void onFinish() {
+	        	    	 STATIC_THIS.openLocatorActivity();
+	        	     }
+	        	  }.start();
+	        	  
+			    /*new AlertDialog.Builder(STATIC_THIS)
 			    .setTitle("Title")
 			    .setMessage("Do you really want to pick up it?")
 			    .setIcon(android.R.drawable.ic_dialog_alert)
 			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
 			        public void onClick(DialogInterface dialog, int whichButton) {
-			        	Toast.makeText(oTest, "Object: " + text + " is picked up", Toast.LENGTH_SHORT).show();
+			        	
 			        }})
-			     .setNegativeButton(android.R.string.no, null).show();
+			     .setNegativeButton(android.R.string.no, null).show();*/
 			  }
 		});
 	}
@@ -676,7 +705,13 @@ public class RadarActivity extends AndroidHarness {
 		return (SuperimposeJME)app;
 	}
 	
-	public LatLng getTargetPosition() {
-		return this.selectedPosition;
+	public Location getTargetPosition() {
+		return this.targetLocation;
+	}
+	
+	private void openLocatorActivity(){
+		stopPreview = true;
+		Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+		startActivity(i);	
 	}
 }
