@@ -65,7 +65,7 @@ public class RadarActivity extends AndroidHarness {
 	
 	private KalmanLatLong oSmoothGPS;
 	
-	//protected LatLng selectedPosition = null;
+	protected LatLng selectedPosition = null;
 	private Location targetLocation = new Location("");
 	protected float rollAvg = 0f;
 	protected int rollAvgCounter = 32;
@@ -205,10 +205,6 @@ public class RadarActivity extends AndroidHarness {
 				
 				//tu jest lokalizacja do ktorej zmierzamy
 				//Location targetLocation = new Location("");
-				// altanka
-			    targetLocation.setLatitude(52.107814);
-			    targetLocation.setLongitude(21.042722);
-			    RadarActivity.this.selectedPosition = new LatLng(52.107814, 21.042722);
 				// srodek drogi
 //			    targetLocation.setLatitude(tmpLat);
 //			    targetLocation.setLongitude(tmpLng);
