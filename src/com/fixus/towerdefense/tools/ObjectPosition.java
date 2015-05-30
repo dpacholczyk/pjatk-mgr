@@ -41,10 +41,10 @@ public class ObjectPosition extends Position {
 			bottomLimit += 360;
 		}
 		
-		Log.d("SEEN", "personAzimuth: " + personAzimuth);
-		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
-		Log.d("SEEN", "topLimit: " + topLimit);
-		Log.d("SEEN", "bottomLimit: " + bottomLimit);
+//		Log.d("SEEN", "personAzimuth: " + personAzimuth);
+//		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
+//		Log.d("SEEN", "topLimit: " + topLimit);
+//		Log.d("SEEN", "bottomLimit: " + bottomLimit);
 		
 		// warunek który sprawdza czy zakresy nie są w w przeciwstawnych ćwiartkach. Jesli tak to należy sprawdzić dwa zakresy
 		if(topLimit >= 0 && (bottomLimit >= 270 && bottomLimit < 360)) {
@@ -68,9 +68,10 @@ public class ObjectPosition extends Position {
 	}
 	
 	public float countObjectPosition(double personAzimuth, double viewAngle) {
-		float moveOffset = (float)(viewAngle/10);
+		float moveOffset = (float)(viewAngle/40	);
+		float newPosition = (float)( ((this.azimuth - personAzimuth) / moveOffset) );
 		// kolejność odejmowania jest ważna. 
 		// jeśli będzie zła kolejność to kierunek przesunięcie będzie odwrotny 
-		return (float)( ((this.azimuth - personAzimuth) / moveOffset) );
+		return newPosition;
 	}
 }

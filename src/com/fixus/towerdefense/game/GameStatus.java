@@ -16,7 +16,7 @@ public class GameStatus {
 	
 	public static double radius;
 	
-	public static double horizontalViewAngle = 90.0;
+	public static double horizontalViewAngle = 170.0;
 	
 	public static double moveOffset = 5;
 	

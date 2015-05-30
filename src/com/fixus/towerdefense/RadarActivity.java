@@ -2,7 +2,7 @@ package com.fixus.towerdefense;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.Random;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -78,6 +78,14 @@ public class RadarActivity extends AndroidHarness {
 	public float azimut;
 	public String debugText;
 	public float azimuthMedian = 0f;
+	public boolean newMove = true;
+	public int newMoveCounter = 0;
+	public int frameOffset = 25;
+	public float floatPart = 0f;
+	public float newObjectPosition = 0f;
+	public float oldObjetPosition = 0f;
+	public boolean add = true;
+	public float partPos = 0f;
 	
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
@@ -138,13 +146,17 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation.setLatitude(oSmoothGPS.getLatitude());
 					fromLocation.setLongitude(oSmoothGPS.getLongitude());
 					azimuthText.setText("1)" + gpsLocation.getLatitude() + " " + gpsLocation.getLongitude()+
-									  "\n2)" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude() +
-									  "\n3)52.133117 20.665808");
+									  "\n2)" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude());
 				}else{
 					
 					//52.133340, 20.666227
-//					fromLocation.setLatitude(52.109766);
-//					fromLocation.setLongitude(21.044573);
+//					fromLocation.setLatitude(52.107995);
+//					fromLocation.setLongitude(21.042950);
+//					oSmoothGPS.Process(fromLocation.getLatitude(), fromLocation.getLongitude(), 
+//					gpsLocation.getAccuracy(), System.currentTimeMillis());
+//					fromLocation = new Location("");
+//					fromLocation.setLatitude(oSmoothGPS.getLatitude());
+//					fromLocation.setLongitude(oSmoothGPS.getLongitude());
 				}
 				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
 				
@@ -154,16 +166,16 @@ public class RadarActivity extends AndroidHarness {
 				 */
 				if(!PhonePosition.calibrated) {
 					if(i == 0) {
-						new AlertDialog.Builder(RadarActivity.this)
-					    .setTitle("Kalibracja")
-					    .setMessage("Rozpoczynam kalibrację...trzymaj telefon w pozycji wyjściowej")
-					    .setCancelable(true)
-					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
-			                public void onClick(DialogInterface dialog, int id) {
-			                    dialog.cancel();
-			                }
-					     })
-					     .show();
+//						new AlertDialog.Builder(RadarActivity.this)
+//					    .setTitle("Kalibracja")
+//					    .setMessage("Rozpoczynam kalibrację...trzymaj telefon w pozycji wyjściowej")
+//					    .setCancelable(true)
+//					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
+//			                public void onClick(DialogInterface dialog, int id) {
+//			                    dialog.cancel();
+//			                }
+//					     })
+//					     .show();
 					}
 					if(i < RadarActivity.this.rollAvgCounter) {
 						RadarActivity.this.rollAvg += tmpMatrix[2];
@@ -171,34 +183,34 @@ public class RadarActivity extends AndroidHarness {
 						RadarActivity.this.rollAvg /= i;
 						PhonePosition phone = new PhonePosition();
 						phone.calibration(RadarActivity.this.rollAvg);
-						new AlertDialog.Builder(RadarActivity.this)
-					    .setTitle("Kalibracja")
-					    .setMessage("Kalibracja zakończona: " + RadarActivity.this.rollAvg)
-					    .setCancelable(true)
-					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
-			                public void onClick(DialogInterface dialog, int id) {
-			                    dialog.cancel();
-			                }
-					     })
-					     .show();
+//						new AlertDialog.Builder(RadarActivity.this)
+//					    .setTitle("Kalibracja")
+//					    .setMessage("Kalibracja zakończona: " + RadarActivity.this.rollAvg)
+//					    .setCancelable(true)
+//					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
+//			                public void onClick(DialogInterface dialog, int id) {
+//			                    dialog.cancel();
+//			                }
+//					     })
+//					     .show();
 						
 						GameStatus.phone = phone;
 					}
 				}				
 				//52.133117, 20.665808
-				double tmpLat = 52.133117;
-				double tmpLng = 20.665808;
+				double tmpLat = 52.250376;
+				double tmpLng = 21.060323;
 				
 				//tu jest lokalizacja do ktorej zmierzamy
 				Location targetLocation = new Location("");
 				// altanka
-//			    targetLocation.setLatitude(52.107814);
-//			    targetLocation.setLongitude(21.042722);
-//			    RadarActivity.this.selectedPosition = new LatLng(52.107814, 21.042722);
+			    targetLocation.setLatitude(52.107814);
+			    targetLocation.setLongitude(21.042722);
+			    RadarActivity.this.selectedPosition = new LatLng(52.107814, 21.042722);
 				// srodek drogi
-			    targetLocation.setLatitude(tmpLat);
-			    targetLocation.setLongitude(tmpLng);
-			    RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
+//			    targetLocation.setLatitude(tmpLat);
+//			    targetLocation.setLongitude(tmpLng);
+//			    RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
 			    //a to ustawi odpowiednio strzalke
 			    /**
 			     * @TODO przywrocic if
@@ -214,21 +226,55 @@ public class RadarActivity extends AndroidHarness {
 					 * to oczywiśćie tmp. obiekt nie może być tworzony w każdej klatce
 					 */
 					ObjectPosition object = new ObjectPosition();
-					azimuthText.setText(azimuthText.getText() + "\n" + azimuthInDegress2 + "\n " + getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
+//					azimuthText.setText(azimuthText.getText() + "\n" + azimuthInDegress2 + "\n " + getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
 					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
+//					Log.d("SEEN", "b: " + fromLocation.bearingTo(targetLocation));
 					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
 //					if(!object.inDistance(distance)) {
 //						show = false;
 //					}
-					Log.d("SHOW", "show: " + show);
+					Log.d("POSITION_S", "show: " + show);
+//					Log.d("POZYCJA", "" + getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
+//					Log.d("POZYCJA", "" + azimuthInDegress2);
+//					Log.d("POZYCJA", "" + (getAzimuthData(azimuthInDegress2, fromLocation, targetLocation) - azimuthInDegress2));
+//					Log.d("POZYCJA", "----");					
+//					show = true;
+					int offset = 2;
 					if(frameLimiter >= azimuthLimiter) {
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
-							float newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
-							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition, -2.5f, 0.0f);
+							if(newMove) {
+								newObjectPosition = object.countObjectPosition(azimuthInDegress2, GameStatus.horizontalViewAngle);
+								if(newObjectPosition == oldObjetPosition) {
+									Log.d("ANIM", "Ta sama pozycja");
+								} else {
+									Log.d("ANIM", "Nowa pozycja: " + newObjectPosition);
+									if(newObjectPosition > oldObjetPosition) {
+										add = true;
+										partPos = (newObjectPosition - oldObjetPosition)/frameOffset;
+									} else {
+										add = false;
+										partPos = (oldObjetPosition - newObjectPosition)/frameOffset;
+									}
+									newMove = false;
+									oldObjetPosition = newObjectPosition;
+								}
+							}
+							if(!newMove) {
+//								((com.fixus.towerdefense.model.SuperimposeJME) app).moveByPart(partPos, add);
+								((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(newObjectPosition);
+							}
+
+							//							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition/offset, -2.5f, 0.0f);
 						}
 						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
 						}
+					}
+					newMoveCounter++;
+					if(newMoveCounter > frameOffset) {
+						Log.d("ANIM", "reset na " + newMoveCounter);
+						newMove = true;
+						newMoveCounter = 0;
 					}
 
 //				}
@@ -458,20 +504,27 @@ public class RadarActivity extends AndroidHarness {
 			 * wyciecie tekstu
 			 */
 			azimuthText = new TextView(this);
-			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
-			/*posButton = new Button(this);
+//			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
+			posButton = new Button(this);
 			posButton.setText("pos -1");
 			posButton.setOnClickListener(new OnClickListener() {
 				
 				public void onClick(View v) {
-					
-					lowerX -= 0.25f;
-					Log.d("LOWER", lowerX + "");
-					((com.fixus.towerdefense.model.SuperimposeJME) app).move(lowerX, -2.5f, 0);
+					Random generator = new Random();
+					int random = generator.nextInt(2);
+					if(random == 0) {
+						lowerX = 2f * -1;
+					} else {
+						lowerX = 2f;
+					}
+					Log.d("MOTION", "x: " + lowerX + " | " + random);
+//					Log.d("LOWER", lowerX + "");
+//					((com.fixus.towerdefense.model.SuperimposeJME) app).move(1, -2.5f, 0);
+					((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(lowerX);
 					
 				}
 			});
-			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));*/
+			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));
 			
 			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
 			addContentView(this.mPreview, lp);	

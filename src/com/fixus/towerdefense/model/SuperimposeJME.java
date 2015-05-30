@@ -10,16 +10,16 @@
 package com.fixus.towerdefense.model;
 
 import android.location.Location;
-import android.provider.ContactsContract.StatusUpdates;
 import android.util.Log;
-import android.view.View;
 
 import com.fixus.towerdefense.RadarActivity;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
-import com.jme3.animation.LoopMode;
 import com.jme3.app.SimpleApplication;
+import com.jme3.cinematic.MotionPath;
+import com.jme3.cinematic.MotionPathListener;
+import com.jme3.cinematic.events.MotionEvent;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.TouchInput;
 import com.jme3.input.controls.TouchListener;
@@ -37,7 +37,6 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Quad;
@@ -80,6 +79,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	
 	public static final int MOVE_ROTATION = 0;
 	public static final int GPS_ROTATION = 1;
+	
+	public float oldX = 0;
 
 	
   public Spatial ninja;
@@ -102,7 +103,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		initForegroundScene();	
 		initBackgroundCamera();		
 		initForegroundCamera(mForegroundCamFOVY);
-	}
+		
+    }
 	
 	private void addTouchListener(){
 		//inputManager.addListener(new TouchTrigger(0),"Click");
@@ -211,7 +213,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         // rotacja odbywa się tak, że 0 to znaczy skierowane na wprost zgodnie z tym jak sie patrzy przez kamere
         // obrot np. 90 stopni oznacza obrot w lewo
         ninja.rotate(0.0f, (float)Math.toRadians(0.0), 0.0f);
-        ninja.setLocalTranslation(0.0f, -2.5f, -15.0f);
+        ninja.setLocalTranslation(0.0f, -2.5f, 0);
+        
         rootNode.attachChild(ninja);
         
         // You must add a light to make the model visible
@@ -249,6 +252,90 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		mZ = z;
 		
 		rotationMove = true;
+	}
+	
+	public void moveByPart(float x, boolean add) {
+		if(ninja != null) {
+			Vector3f currentTranslation = ninja.getLocalTranslation();
+			Log.d("ANIM", "old: " + currentTranslation.x);
+			
+			if(add) {
+				if(currentTranslation.x < 0 && x < 0) {
+					mX = currentTranslation.x - x;
+				} else if(currentTranslation.x < 0 && x > 0) {
+					mX = currentTranslation.x + x;
+				} else if(currentTranslation.x > 0 && x < 0) {
+					mX = currentTranslation.x - x;
+				} else if(currentTranslation.x > 0 && x > 0) {
+					mX = currentTranslation.x + x;
+				} else if(currentTranslation.x == 0 && x < 0) {
+					mX = currentTranslation.x - x;
+				} else if(currentTranslation.x == 0 && x > 0) {
+					mX = currentTranslation.x + x;
+				}
+			} else {
+				if(currentTranslation.x < 0 && x < 0) {
+					mX = currentTranslation.x + x;
+				} else if(currentTranslation.x < 0 && x > 0) {
+					mX = currentTranslation.x - x;
+				} else if(currentTranslation.x > 0 && x < 0) {
+					mX = currentTranslation.x + x;
+				} else if(currentTranslation.x > 0 && x > 0) {
+					mX = currentTranslation.x - x;
+				} else if(currentTranslation.x == 0 && x < 0) {
+					mX = currentTranslation.x + x;
+				} else if(currentTranslation.x == 0 && x > 0) {
+					mX = currentTranslation.x - x;
+				}
+			}
+			
+			Log.d("ANIM", "new: " + mX + " | " + x);
+			Log.d("ANIM", "add: " + add);
+			rotationMove = true;
+		}
+	}
+	
+	MotionPath path = new MotionPath();
+	MotionEvent motionControl;
+	float newXAnimation = 0.0f;
+	public void startCinematic(float x) {
+		Log.d("MOTION", "Rozpoczynam motion");	
+//		path = new MotionPath();
+		if(ninja != null) {
+			Vector3f currentTranslation = ninja.getLocalTranslation();
+			Log.d("MOTION", "OLD: " + currentTranslation.x);
+			Log.d("MOTION", "NEW: " + x);
+			Log.d("MOTION", "-------------------");
+			newXAnimation = x;
+			path = new MotionPath();
+			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
+			path.addWayPoint(new Vector3f(x, -2.5f, 0));
+			
+			motionControl = new MotionEvent(ninja, path);
+			motionControl.setDirectionType(MotionEvent.Direction.PathAndRotation);
+	        motionControl.setRotation(new Quaternion().fromAngleNormalAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y));
+	        motionControl.setInitialDuration(4f);
+	        motionControl.setSpeed(2f);    
+	        
+	        path.addListener(new MotionPathListener() {
+
+	            public void onWayPointReach(MotionEvent control, int wayPointIndex) {
+	                if (path.getNbWayPoints() == wayPointIndex + 1) {
+	                    Log.d("MOTION", control.getSpatial().getName() + "Finished!!! ");
+	                    try {
+		                    path.removeWayPoint(wayPointIndex);
+	                    } catch(ArrayIndexOutOfBoundsException ex) {
+	                    	Log.d("MOTION", ex.getMessage());
+	                    }
+	            		moveX(newXAnimation);
+	                } else {
+	                    Log.d("MOTION", control.getSpatial().getName() + " Reached way point " + wayPointIndex);
+	                }
+	            }
+	        });
+	        
+	        motionControl.play();
+		}
 	}
 	
 	public void moveX(float x) {
@@ -387,9 +474,27 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		}
 
 		if((rotationMove && ninja != null) || (gpsMove && ninja != null)) {
-			Vector3f currentTranslation = ninja.getLocalTranslation();
+			float newX = 0f;
+			if(mNinjaPosition.x > this.oldX) {
+				newX = this.oldX + mNinjaPosition.x;
+			} else if(mNinjaPosition.x == this.oldX) {
+				newX = mNinjaPosition.x;
+			} else {
+				newX = this.oldX - mNinjaPosition.x;
+			}
+			this.oldX = mNinjaPosition.x;
+//			Vector3f target = new Vector3f(newX, -2.5f, 0);
+//			Vector3f start = ninja.getLocalTranslation();
+//			ninja.setLocalTranslation(start.interpolate(target, (tpf*3)/start.distance(target)));
+//Log.d("KAMERA", "ninja position: " + mNinjaPosition.x + "");			
+//Log.d("KAMERA", "mX: " + mX);
+//Log.d("KAMERA", this.oldX + "");
+//Log.d("KAMERA", newX + "");
+//Log.d("KAMERA", "----------------");
 			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+//			ninja.setLocalTranslation(mX, -2.5f, 0);
 //			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f,(mNinjaPosition.z) * -1);
+//			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f, 0);
 //			ninja.setLocalTranslation(mX, mY, mZ);
 //			rotationMove = false;
 			if(gpsMove) {
@@ -398,16 +503,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			if(rotationMove) {
 				rotationMove = false;
  			}
-			Log.d("TEST_GPS", mNinjaPosition.x +  " | " + mNinjaPosition.y + " | " + (mNinjaPosition.z+32) * -1);
 		}
-//		if(gpsMove && ninja != null) {
-//			Vector3f currentTranslation = ninja.getLocalTranslation();
-//			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z+2) * -1);
-////			ninja.setLocalTranslation(0 ,mNinjaPosition.y-2.5f,(mNinjaPosition.z+2) * -1);
-//			Log.d("TEST_GPS", mX +  " | " + mNinjaPosition.y + " | " + (mNinjaPosition.z+2) * -1);
-//	
-//			gpsMove = false;
-//		}
 				
 		mVideoBGGeom.updateLogicalState(tpf);
 		mVideoBGGeom.updateGeometricState();

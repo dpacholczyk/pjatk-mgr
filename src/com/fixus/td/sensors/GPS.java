@@ -21,7 +21,7 @@ public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
 	private final static String POP_MSG = "GPS is not enabled. Do you want open settings menu?";
 	// The minimum distance to change Updates in meters
-	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 2;
+	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 3;
 	// The minimum time between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 1500;
 	
