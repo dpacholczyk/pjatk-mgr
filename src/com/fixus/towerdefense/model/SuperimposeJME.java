@@ -130,6 +130,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		        if (results.size() > 0) {
 		        	if (results.getClosestCollision()!=null) {
 						RadarActivity.messageDialog(results.getClosestCollision().getGeometry().getName());
+						toogleObject(false);
+						RadarActivity.blockShow = true;
 					}
 		        }
 		        
@@ -200,13 +202,17 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	public void initForegroundScene() {
 		rootNode.detachAllChildren();
 		// Load a model from test_data (OgreXML + material + texture)
-        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
+//        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
+        ninja = assetManager.loadModel("Models/planet.obj");
+        
 //        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.j3o");
         ninja.scale(0.025f, 0.025f, 0.025f);
 //        Material mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md"); // default material
       Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"); // default material
 //        Material mat = assetManager.loadMaterial("Materials/Ninja/Ninja.j3m");
-        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/Ninja/Ninja.jpg"));
+//        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/Ninja/Ninja.jpg"));
+      mat.setTexture("ColorMap", assetManager.loadTexture("Textures/planet.jpg"));
+      
         ninja.setMaterial(mat);               
         
         // Math.toRadians przelicza kąt na radiany które podawane są do metody w celu rotacji.
@@ -222,9 +228,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
         sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
         rootNode.addLight(sun);
 	
-        mAniControl = ninja.getControl(AnimControl.class);
-        mAniControl.addListener(this);
-        mAniChannel = mAniControl.createChannel();
+//        mAniControl = ninja.getControl(AnimControl.class);
+//        mAniControl.addListener(this);
+//        mAniChannel = mAniControl.createChannel();
         // show animation from beginning
 //        mAniChannel.setAnim("Walk");
 //        mAniChannel.setLoopMode(LoopMode.Loop);

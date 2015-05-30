@@ -89,6 +89,8 @@ public class RadarActivity extends AndroidHarness {
 	public boolean add = true;
 	public float partPos = 0f;
 	
+	public static boolean blockShow = false;
+	
 	private final Camera.PreviewCallback mCameraCallback = new Camera.PreviewCallback() {
 		int i = 0;
 		int frameCounter = 0;
@@ -107,36 +109,7 @@ public class RadarActivity extends AndroidHarness {
 				);
 
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-				
-//				framesValues0[frameCounter] = azimuthInDegress;
-				
 				azimuthInDegress2 = Compas.getAzimuthInDegress(azimut,  false);
-
-//				framesValues[frameCounter] = azimuthInDegress2;
-//				frameCounter++;
-//				frameLimiter++;
-//				if(frameLimiter >= azimuthLimiter) {
-//					double azimuthSum = 0.0f;
-//					for(int fCounter = 0; fCounter < azimuthLimiter; fCounter++) {
-//						azimuthSum += framesValues[fCounter];
-//					}
-//					azimuthAvg = azimuthSum / azimuthLimiter;
-//					
-//					Arrays.sort(framesValues0);
-//					float median;
-//					if (framesValues0.length % 2 == 0) {
-//					    median = ((float)framesValues0[framesValues0.length/2] + (float)framesValues0[framesValues0.length/2 - 1])/2;
-//					}
-//					else {
-//					    median = (float) framesValues0[framesValues0.length/2];
-//					}
-//					azimuthMedian = median;
-//				}
-				
-				/**
-				 * @TODO
-				 * przyrocic utawianie fromLocation
-				 */				
 				//tu ustawiamy nasza lokazliazacje
 				Location fromLocation = new Location("");
 				Location gpsLocation = new Location("");
@@ -167,35 +140,12 @@ public class RadarActivity extends AndroidHarness {
 				 * przenieść do PhonePosition do osobnej metody
 				 */
 				if(!PhonePosition.calibrated) {
-					if(i == 0) {
-//						new AlertDialog.Builder(RadarActivity.this)
-//					    .setTitle("Kalibracja")
-//					    .setMessage("Rozpoczynam kalibrację...trzymaj telefon w pozycji wyjściowej")
-//					    .setCancelable(true)
-//					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
-//			                public void onClick(DialogInterface dialog, int id) {
-//			                    dialog.cancel();
-//			                }
-//					     })
-//					     .show();
-					}
 					if(i < RadarActivity.this.rollAvgCounter) {
 						RadarActivity.this.rollAvg += tmpMatrix[2];
 					} else {
 						RadarActivity.this.rollAvg /= i;
 						PhonePosition phone = new PhonePosition();
-						phone.calibration(RadarActivity.this.rollAvg);
-//						new AlertDialog.Builder(RadarActivity.this)
-//					    .setTitle("Kalibracja")
-//					    .setMessage("Kalibracja zakończona: " + RadarActivity.this.rollAvg)
-//					    .setCancelable(true)
-//					    .setPositiveButton("OK",  new DialogInterface.OnClickListener() {
-//			                public void onClick(DialogInterface dialog, int id) {
-//			                    dialog.cancel();
-//			                }
-//					     })
-//					     .show();
-						
+						phone.calibration(RadarActivity.this.rollAvg);						
 						GameStatus.phone = phone;
 					}
 				}				
@@ -231,6 +181,9 @@ public class RadarActivity extends AndroidHarness {
 					object.setAzimut(getAzimuthData(azimuthInDegress2, fromLocation, targetLocation));
 //					Log.d("SEEN", "b: " + fromLocation.bearingTo(targetLocation));
 					boolean show = object.isSeen(azimuthInDegress2, GameStatus.horizontalViewAngle);
+					if(blockShow) {
+						show = false;
+					}
 //					if(!object.inDistance(distance)) {
 //						show = false;
 //					}
@@ -444,6 +397,7 @@ public class RadarActivity extends AndroidHarness {
   			//this.selectedPosition = new LatLng(tmpLat, tmpLng);
   			this.targetLocation.setLatitude(tmpLat);
   			this.targetLocation.setLongitude(tmpLng);
+  			blockShow = false;
   		}
 		this.cTools = new CameraTool();
 		
