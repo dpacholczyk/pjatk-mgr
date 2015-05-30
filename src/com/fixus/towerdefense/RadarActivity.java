@@ -2,7 +2,6 @@ package com.fixus.towerdefense;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -17,9 +16,8 @@ import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -35,10 +33,8 @@ import com.fixus.towerdefense.camera.CameraTool;
 import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.model.SuperimposeJME;
 import com.fixus.towerdefense.tools.Compas;
-import com.fixus.towerdefense.tools.MapPoint;
 import com.fixus.towerdefense.tools.ObjectPosition;
 import com.fixus.towerdefense.tools.PhonePosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.jme3.app.AndroidHarness;
 import com.jme3.renderer.android.TextureUtil;
 import com.jme3.system.android.AndroidConfigChooser.ConfigType;
@@ -47,7 +43,7 @@ import com.jme3.texture.Image;
 public class RadarActivity extends AndroidHarness {
 	private static final String TAG = "TD_RADARACTIVITY";
 	
-	private static RadarActivity oTest;
+	private static RadarActivity STATIC_THIS;
 	
 	private Camera mCamera;
 	private CameraPreview mPreview;
@@ -60,11 +56,11 @@ public class RadarActivity extends AndroidHarness {
 	private float lastFullAzimuth = 0f;
 	private float lastFullRoll = 0f;
 	private ImageView compassNeedle;
-	private int posX = 0;
 	
 	private KalmanLatLong oSmoothGPS;
 	
-	protected LatLng selectedPosition = null;
+	//protected LatLng selectedPosition = null;
+	private Location targetLocation = new Location("");
 	protected float rollAvg = 0f;
 	protected int rollAvgCounter = 32;
 	
@@ -137,8 +133,8 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation = new Location("");
 					fromLocation.setLatitude(oSmoothGPS.getLatitude());
 					fromLocation.setLongitude(oSmoothGPS.getLongitude());
-					azimuthText.setText("1)" + gpsLocation.getLatitude() + " " + gpsLocation.getLongitude()+
-									  "\n2)" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude() +
+					azimuthText.setText("GPS" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude()+
+									  "\nTarget" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude() +
 									  "\n3)52.133117 20.665808");
 				}else{
 					
@@ -190,15 +186,15 @@ public class RadarActivity extends AndroidHarness {
 				double tmpLng = 20.665808;
 				
 				//tu jest lokalizacja do ktorej zmierzamy
-				Location targetLocation = new Location("");
+				//Location targetLocation = new Location("");
 				// altanka
 //			    targetLocation.setLatitude(52.107814);
 //			    targetLocation.setLongitude(21.042722);
 //			    RadarActivity.this.selectedPosition = new LatLng(52.107814, 21.042722);
 				// srodek drogi
-			    targetLocation.setLatitude(tmpLat);
-			    targetLocation.setLongitude(tmpLng);
-			    RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
+			    //targetLocation.setLatitude(tmpLat);
+			    //targetLocation.setLongitude(tmpLng);
+			    //RadarActivity.this.selectedPosition = new LatLng(tmpLat, tmpLng);
 			    //a to ustawi odpowiednio strzalke
 			    /**
 			     * @TODO przywrocic if
@@ -259,9 +255,7 @@ public class RadarActivity extends AndroidHarness {
 				 * przywrocic sprawdzanie czy lezy plasko w celu zmiany widoku
 				 */
 				if(PhonePosition.checkIfFlat(sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER)[0], 0)) {
-					stopPreview = true;
-					Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
-					startActivity(i);	
+					openLocatorActivity();
 				}
 				
 				if(lastAzimuth != azimuthInDegress) {
@@ -354,8 +348,8 @@ public class RadarActivity extends AndroidHarness {
 	}
 
 	public RadarActivity() {
-		if(oTest == null){
-			oTest = this;
+		if(STATIC_THIS == null){
+			STATIC_THIS = this;
 		}
 		// Set the application class to run
 		// appClass = "mygame.Main";
@@ -391,9 +385,14 @@ public class RadarActivity extends AndroidHarness {
   	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(Second.POINTS, 0));
   		}
   		if(intent.hasExtra("selectedLat")) {
-  			double tmpLat = intent.getDoubleExtra("selectedLat", 0);
-  			double tmpLng = intent.getDoubleExtra("selectedLng", 0);
-  			this.selectedPosition = new LatLng(tmpLat, tmpLng);
+  			/*
+  			 * Pobieramy informacje o aktualnym target point
+  			 */
+  			double tmpLat = intent.getDoubleExtra(LocatorActivity.INTENT_LAT_ID, 0);
+  			double tmpLng = intent.getDoubleExtra(LocatorActivity.INTENT_LONG_ID, 0);
+  			//this.selectedPosition = new LatLng(tmpLat, tmpLng);
+  			this.targetLocation.setLatitude(tmpLat);
+  			this.targetLocation.setLongitude(tmpLng);
   		}
 		this.cTools = new CameraTool();
 		
@@ -601,20 +600,41 @@ public class RadarActivity extends AndroidHarness {
 	}
 	
 	public static void messageDialog(final String text){
-		oTest.runOnUiThread(new Runnable() {
+		STATIC_THIS.runOnUiThread(new Runnable() {
 			  public void run() {
-			    //Toast.makeText(oTest, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
-			    
-			    new AlertDialog.Builder(oTest)
+			    //Toast.makeText(STATIC_THIS, "Interakcja z obiektem: " + text, Toast.LENGTH_SHORT).show();
+			    //w tym miejscu obiekt jest oznaczany jako zebrany
+	        	GameStatus.markCurrentPointAsFound();
+	        	
+	        	/*
+	        	 * Dawid - tu wstaw kod umozliwiajacy schowanie obiektu
+	        	 */
+	        	
+	        	//toast z wiadomoscia o podniesieniu obiektu
+	        	Toast.makeText(STATIC_THIS, "Object: " + text + " is picked up", Toast.LENGTH_SHORT).show();
+	        	
+	        	//Po 5 sekundach przenies na widok map w celu wybrania kolejnego pkt
+	        	new CountDownTimer(5000, 1000) {
+
+	        	     public void onTick(long millisUntilFinished) {
+	        	         //nic nie rob
+	        	     }
+
+	        	     public void onFinish() {
+	        	    	 STATIC_THIS.openLocatorActivity();
+	        	     }
+	        	  }.start();
+	        	  
+			    /*new AlertDialog.Builder(STATIC_THIS)
 			    .setTitle("Title")
 			    .setMessage("Do you really want to pick up it?")
 			    .setIcon(android.R.drawable.ic_dialog_alert)
 			    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
 			        public void onClick(DialogInterface dialog, int whichButton) {
-			        	Toast.makeText(oTest, "Object: " + text + " is picked up", Toast.LENGTH_SHORT).show();
+			        	
 			        }})
-			     .setNegativeButton(android.R.string.no, null).show();
+			     .setNegativeButton(android.R.string.no, null).show();*/
 			  }
 		});
 	}
@@ -623,7 +643,13 @@ public class RadarActivity extends AndroidHarness {
 		return (SuperimposeJME)app;
 	}
 	
-	public LatLng getTargetPosition() {
-		return this.selectedPosition;
+	public Location getTargetPosition() {
+		return this.targetLocation;
+	}
+	
+	private void openLocatorActivity(){
+		stopPreview = true;
+		Intent i = new Intent(RadarActivity.this, LocatorActivity.class);
+		startActivity(i);	
 	}
 }

@@ -15,7 +15,6 @@ import android.util.Log;
 import com.fixus.td.popup.SettingsPopUp;
 import com.fixus.towerdefense.RadarActivity;
 import com.fixus.towerdefense.model.SuperimposeJME;
-import com.google.android.gms.maps.model.LatLng;
 
 public class GPS extends Service implements LocationListener {
 	private final static String POP_TITLE = "GPS Settings";
@@ -133,11 +132,11 @@ public class GPS extends Service implements LocationListener {
 				
 				if(location != null) {
 					Location ninjaLocation = new Location("");
-					LatLng targetPosition = ((RadarActivity)this.mContext).getTargetPosition();
+					Location targetPosition = ((RadarActivity)this.mContext).getTargetPosition();
 				
 					if(targetPosition != null) {
-						ninjaLocation.setLatitude(targetPosition.latitude);
-						ninjaLocation.setLongitude(targetPosition.longitude);
+						ninjaLocation.setLatitude(targetPosition.getLatitude());
+						ninjaLocation.setLongitude(targetPosition.getLongitude());
 						app.setUserLocation(location, ninjaLocation);
 						Log.d("TEST_GPS", "d: " + location.distanceTo(ninjaLocation));
 					}
