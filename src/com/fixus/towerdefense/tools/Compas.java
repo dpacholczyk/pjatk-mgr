@@ -45,13 +45,17 @@ public class Compas {
 		float azimuthInDegress = (float)Math.toDegrees(fAzimuth);
 		//jak telefon jest trzymany poziomo nalezy uwzglednic przesuni�cie o 90 stopni
 		float landscapeRotation = isLandscape ? 90f : 0f;
+		azimuthInDegress = azimuthInDegress + landscapeRotation;
+		if(azimuthInDegress >= 360) {
+			azimuthInDegress -= 360;
+		}
 		if (azimuthInDegress < 0.0f) {
 		    azimuthInDegress += 360.0f;
 		}
 		//zmniejszam precyzje
 		azimuthInDegress = new BigDecimal(azimuthInDegress).setScale(0, BigDecimal.ROUND_HALF_UP).floatValue();
 		
-		return azimuthInDegress + landscapeRotation;
+		return azimuthInDegress;
 	}
 	
 	public static String getDirection(float fAnkle){

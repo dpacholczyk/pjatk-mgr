@@ -312,6 +312,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			Log.d("MOTION", "OLD: " + currentTranslation.x);
 			Log.d("MOTION", "NEW: " + x);
 			Log.d("MOTION", "-------------------");
+			Log.d("TEST_GPS", "cinematic: " + (mNinjaPosition.z) * -1);
 			newXAnimation = x;
 			path = new MotionPath();
 			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
@@ -489,20 +490,12 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 				newX = this.oldX - mNinjaPosition.x;
 			}
 			this.oldX = mNinjaPosition.x;
-//			Vector3f target = new Vector3f(newX, -2.5f, 0);
-//			Vector3f start = ninja.getLocalTranslation();
-//			ninja.setLocalTranslation(start.interpolate(target, (tpf*3)/start.distance(target)));
-//Log.d("KAMERA", "ninja position: " + mNinjaPosition.x + "");			
-//Log.d("KAMERA", "mX: " + mX);
-//Log.d("KAMERA", this.oldX + "");
-//Log.d("KAMERA", newX + "");
-//Log.d("KAMERA", "----------------");
-			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
-//			ninja.setLocalTranslation(mX, -2.5f, 0);
+			Log.d("TEST_GPS", "" + (mNinjaPosition.z) * -1);
+//			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+			ninja.setLocalTranslation(mX, -2.5f, 0);
 //			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f,(mNinjaPosition.z) * -1);
 //			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f, 0);
 //			ninja.setLocalTranslation(mX, mY, mZ);
-//			rotationMove = false;
 			if(gpsMove) {
 				gpsMove = false;
 			}

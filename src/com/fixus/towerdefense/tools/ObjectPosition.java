@@ -41,20 +41,33 @@ public class ObjectPosition extends Position {
 			bottomLimit += 360;
 		}
 		
-//		Log.d("SEEN", "personAzimuth: " + personAzimuth);
-//		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
-//		Log.d("SEEN", "topLimit: " + topLimit);
-//		Log.d("SEEN", "bottomLimit: " + bottomLimit);
+		Log.d("SEEN", "personAzimuth: " + personAzimuth);
+		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
+		Log.d("SEEN", "topLimit: " + topLimit);
+		Log.d("SEEN", "bottomLimit: " + bottomLimit);
 		
-		// warunek który sprawdza czy zakresy nie są w w przeciwstawnych ćwiartkach. Jesli tak to należy sprawdzić dwa zakresy
-		if(topLimit >= 0 && (bottomLimit >= 270 && bottomLimit < 360)) {
-			if((this.azimuth >= 0 && this.azimuth < topLimit) || (this.azimuth < 360 && this.azimuth >= bottomLimit)) {
+		if(bottomLimit > topLimit){
+			if(this.azimuth >= bottomLimit){
 				return true;
 			}
+			if(this.azimuth <= topLimit){
+				return true;
+			}
+		}else{
+			if(this.azimuth >= bottomLimit && this.azimuth <= topLimit){
+				return true;
+			}		
 		}
-		if(this.azimuth <= topLimit && this.azimuth > bottomLimit) {
-			return true;
-		}
+		
+		// warunek który sprawdza czy zakresy nie są w w przeciwstawnych ćwiartkach. Jesli tak to należy sprawdzić dwa zakresy
+//		if(bottomLimit >= 270 && bottomLimit < 360) {
+//			if((this.azimuth >= 0 && this.azimuth < topLimit) || (this.azimuth < 360 && this.azimuth >= bottomLimit)) {
+//				return true;
+//			}
+//		}
+//		if(this.azimuth <= topLimit && this.azimuth > bottomLimit) {
+//			return true;
+//		}
 		
 		return false;
 	}
@@ -68,8 +81,27 @@ public class ObjectPosition extends Position {
 	}
 	
 	public float countObjectPosition(double personAzimuth, double viewAngle) {
-		float moveOffset = (float)(viewAngle/40	);
-		float newPosition = (float)( ((this.azimuth - personAzimuth) / moveOffset) );
+		float moveOffset = (float)GameStatus.horizontalViewAngle / 80;
+		// -(azimuthInDegress - directionInDegress)
+		boolean changeSide = false;
+		Log.d("COUNT_OBJECT", "personAzimuth_old: " + personAzimuth);
+		Log.d("COUNT_OBJECT", "this.azimuth_old: " + this.azimuth);
+		float newAzimuth = (float)this.azimuth;
+		if((personAzimuth + GameStatus.horizontalViewAngle/2) < this.azimuth) {
+			personAzimuth += 360;
+			changeSide = true;
+		} else if((this.azimuth + GameStatus.horizontalViewAngle/2) < personAzimuth) {
+			newAzimuth += 360;
+//			changeSide = false;
+		}
+
+		Log.d("COUNT_OBJECT", "personAzimuth_new: " + personAzimuth);
+		Log.d("COUNT_OBJECT", "this.azimuth_old: " + newAzimuth);
+		Log.d("COUNT_OBJECT", "change: " + changeSide);
+		float diffrence = changeSide ? (float)((personAzimuth - newAzimuth) * -1) : (float)(personAzimuth - newAzimuth);
+		Log.d("COUNT_OBJECT", "diff: " + diffrence);
+		float newPosition = (float)( -diffrence ) / moveOffset;
+		Log.d("COUNT_OBJECT", "new1: " + newPosition);
 		// kolejność odejmowania jest ważna. 
 		// jeśli będzie zła kolejność to kierunek przesunięcie będzie odwrotny 
 		return newPosition;
