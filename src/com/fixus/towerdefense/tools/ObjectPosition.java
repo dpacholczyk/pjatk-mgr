@@ -3,7 +3,6 @@ package com.fixus.towerdefense.tools;
 import com.fixus.towerdefense.game.GameStatus;
 
 import android.location.Location;
-import android.util.Log;
 
 public class ObjectPosition extends Position {
 	public static final String TAG = "TD_OBJECTPOSITION";
@@ -34,28 +33,61 @@ public class ObjectPosition extends Position {
 		double halfAngle = viewAngle / 2;
 		double topLimit = personAzimuth + halfAngle;
 		double bottomLimit = personAzimuth - halfAngle;
+		
+		/*
+		 * Dzialamy w zakresie <0,360> bo this.azimuth moze miec tylko takie wartosci
+		 */
 		if(topLimit >= 360) {
+			/*
+			 * Dlatego jesli gorna granica przekorczy wartosc 360 stopni
+			 * musimy ja "przekrecic o 360 stopni(przez odjêcie 360 stopni)
+			 */
 			topLimit -= 360;
 		}
 		if(bottomLimit < 0) {
+			/*
+			 * Analogicznie z dolna granica z tym, ¿e jeœli ona jest mniejsza ni¿ 0
+			 * to musimy jej dodaæ 360 stopni
+			 */
 			bottomLimit += 360;
 		}
 		
-//		Log.d("SEEN", "personAzimuth: " + personAzimuth);
-//		Log.d("SEEN", "objectAzimuth: " + this.azimuth);
-//		Log.d("SEEN", "topLimit: " + topLimit);
-//		Log.d("SEEN", "bottomLimit: " + bottomLimit);
-		
-		// warunek ktÃ³ry sprawdza czy zakresy nie sÄ… w w przeciwstawnych Ä‡wiartkach. Jesli tak to naleÅ¼y sprawdziÄ‡ dwa zakresy
-		if(topLimit >= 0 && (bottomLimit >= 270 && bottomLimit < 360)) {
-			if((this.azimuth >= 0 && this.azimuth < topLimit) || (this.azimuth < 360 && this.azimuth >= bottomLimit)) {
+		/*
+		 * Dwa glowne przypadki:
+		 * 
+		 * - dolna granica liczbowo jest wieksza od gornej
+		 * - gorna granica liczbowo wieksza od dolnej
+		 */
+		if(bottomLimit > topLimit){
+			/*
+			 * Przypadek 1 dolna granica liczbowo jest wieksza od gornej. 
+			 * I tu znowu sa dwie mozliwosci poprawne:
+			 */
+			if(this.azimuth >= bottomLimit){
+				/*
+				 * this.azimuth jest wiekszy/rowny od dolnej granicy czyli jest z zakresu
+				 * <bottomLimit, 360>. Wtedy widzimy obiekt
+				 */
 				return true;
 			}
+			if(this.azimuth <= topLimit){
+				/*
+				 * Drugi przypadek gdy widzimy obiekt jest gdy this.azimuth jest mniejszy/rowny
+				 * gornej granicy, czyli jest w wartosci przedzialu
+				 * <0,topLimit>
+				 */
+				return true;
+			}
+		}else{
+			/*
+			 * Przypadek 2. Prawda jest tylko wtedy gdy this.azimuth jest w przedziale
+			 * <bottomLimit,topLimit>
+			 */
+			if(this.azimuth >= bottomLimit && this.azimuth <= topLimit){
+				return true;
+			}
+			
 		}
-		if(this.azimuth <= topLimit && this.azimuth > bottomLimit) {
-			return true;
-		}
-		
 		return false;
 	}
 
