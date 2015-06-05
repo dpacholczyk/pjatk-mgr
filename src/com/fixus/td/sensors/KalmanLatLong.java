@@ -3,82 +3,86 @@ package com.fixus.td.sensors;
 import java.math.BigDecimal;
 
 public class KalmanLatLong {
-	private final float MinAccuracy = 1;
+	private static final float MIN_ACCURACY = 1;
 
-	private float metersPerSecond;
-	private long milisecondsTimestamp;
-	private double latitude;
-	private double longitude;
+	private float fMetersPerSecond;
+	private long lLastTimestamp;
+	private double dLastLatitude;
+	private double dLastLongitude;
 	//result precision
 	private int iPrecision;
-	private float variance;
+	private float fVariance;
 	/**
 	 * 
-	 * @param metersPerSecond - trzeba dac 3 metry albo cos kolo tego
+	 * @param fMetersPerSecond - trzeba dac 3 metry albo cos kolo tego
 	 * @param iPrecision - mowi jaka dokladnosc po przecinku, powinna byc dla dlugosci i szerokosci
 	 */
-	public KalmanLatLong(float metersPerSecond,int iPrecision) {
-		this.metersPerSecond = metersPerSecond;
+	public KalmanLatLong(float fMetersPerSecond,int iPrecision) {
+		this.fMetersPerSecond = fMetersPerSecond;
 		this.iPrecision = iPrecision;
-		variance = -1;
+		fVariance = -1;
 	}
 
 	public long getTimestamp() {
-		return milisecondsTimestamp;
+		return lLastTimestamp;
 	}
 
 	public double getLatitude() {
-		return new BigDecimal(latitude).setScale(iPrecision, BigDecimal.ROUND_HALF_UP).doubleValue();
+		return new BigDecimal(dLastLatitude).setScale(iPrecision, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 
 	public double getLongitude() {
-		return new BigDecimal(longitude).setScale(iPrecision, BigDecimal.ROUND_HALF_UP).doubleValue();
+		return new BigDecimal(dLastLongitude).setScale(iPrecision, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 
-	public float get_accuracy() {
-		return (float) Math.sqrt(variance);
+	public float getAccuracy() {
+		return (float) Math.sqrt(fVariance);
 	}
 	/**
-	 * Kalman filter processing for lattitude and longitude
-	 * @param lat_measurement new measurement of lattidude
-	 * @param lng_measurement new measurement of longitude
-	 * @param accuracy measurement of 1 standard deviation error in metres
-	 * @param TimeStamp_milliseconds time of measurement
+	 * Filtr Kalmana
+	 * 
+	 * @param dNewLatitude nowa szerokosc
+	 * @param dNewLongitudenowa dlugosc
+	 * @param pomiar standardowego odchylenia danego czeku
+	 * @param czas pomiaru
 	 */
-	public void Process(double lat_measurement, double lng_measurement,
-			float accuracy, long TimeStamp_milliseconds) {
-		if (accuracy < MinAccuracy)
-			accuracy = MinAccuracy;
-		if (variance < 0) {
+	public void Process(double dNewLatitude, double dNewLongitude,
+			float fAccuracy, long lTimeStampInMilliseconds) {
+		/*
+		 * Sprawdzenie, czy wartosc odchylenia pomiaru jest 
+		 * wieksza niz zalozona minimalna wartosc (1 m)
+		 */
+		if (fAccuracy < MIN_ACCURACY){
+			fAccuracy = MIN_ACCURACY;
+		}	
+		if (fVariance < 0) {
 			// brak inicjalizacj czyli mamy pierwsze odpalenie
-			this.milisecondsTimestamp = TimeStamp_milliseconds;
-			latitude = lat_measurement;
-			longitude = lng_measurement;
-			variance = accuracy * accuracy;
+			this.lLastTimestamp = lTimeStampInMilliseconds;
+			dLastLatitude = dNewLatitude;
+			dLastLongitude = dNewLongitude;
+			fVariance = fAccuracy * fAccuracy;
 		} else {
-			//Metoda Klamana
-			long TimeInc_milliseconds = TimeStamp_milliseconds
-					- this.milisecondsTimestamp;
-			if (TimeInc_milliseconds > 0) {
-				// time has moved on, so the uncertainty in the current position
-				// increases
-				variance += TimeInc_milliseconds * metersPerSecond
-						* metersPerSecond / 1000;
-				this.milisecondsTimestamp = TimeStamp_milliseconds;
-				// TO DO: USE VELOCITY INFORMATION HERE TO GET A BETTER ESTIMATE
-				// OF CURRENT POSITION
+			//Metoda Klamana - czesc wlasciwa
+			long lTimestampDiff = lTimeStampInMilliseconds
+					- this.lLastTimestamp;
+			if (lTimestampDiff > 0) {
+				/*
+				 * warunek sprawdzajacy czy mielismy zmiane w czasie
+				 * jesli taka zmiana miala miejsce, to musimy przeliczyc 
+				 * wspolczynik kowariancji
+				 */		
+				fVariance += lTimestampDiff * fMetersPerSecond
+						* fMetersPerSecond / 1000;
+				this.lLastTimestamp = lTimeStampInMilliseconds;
 			}
 
-			// Kalman gain matrix K = Covarariance * Inverse(Covariance +
-			// MeasurementVariance)
-			// NB: because K is dimensionless, it doesn't matter that variance
-			// has different units to lat and lng
-			float K = variance / (variance + accuracy * accuracy);
-			// apply K
-			latitude += K * (lat_measurement - latitude);
-			longitude += K * (lng_measurement - longitude);
-			// new Covarariance matrix is (IdentityMatrix - K) * Covarariance
-			variance = (1 - K) * variance;
+			//wzmocnienie maciezy Kalmana
+			float fKalmanGain = fVariance / (fVariance + fAccuracy * fAccuracy);
+			//zastosowanie wzmocnienia
+			dNewLatitude += fKalmanGain * (dNewLatitude - dNewLatitude);
+			dLastLongitude += fKalmanGain * (dNewLongitude - dLastLongitude);
+			// nowa kowariancja (IdentityMatrix - K) * Covarariance
+			fVariance = (1 - fKalmanGain) * fVariance;
 		}
 	}
 }

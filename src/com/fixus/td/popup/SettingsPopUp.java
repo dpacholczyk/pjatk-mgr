@@ -12,7 +12,7 @@ public class SettingsPopUp {
 		this.context = context;
 	}
 
-	public void showPopUp(String title,String message, final String settingsType) {
+	public void showPopUpWithSettingsMenu(String title,String message, final String settingsType) {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 		
 		alertDialog.setTitle(title);
@@ -36,6 +36,14 @@ public class SettingsPopUp {
 					}
 				});
 
+		alertDialog.show();
+	}
+	public void showSimplePopup(String title,String message) {
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+		
+		alertDialog.setTitle(title);
+		alertDialog.setMessage(message);
+		
 		alertDialog.show();
 	}
 }

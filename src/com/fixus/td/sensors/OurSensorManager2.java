@@ -4,10 +4,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
+
+import com.fixus.td.popup.SettingsPopUp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -19,8 +23,11 @@ import android.util.Pair;
 
 @SuppressLint("UseSparseArrays")
 public class OurSensorManager2 implements SensorEventListener{
+	private static final String POPUP_TITLE = "Required sensor isn't available";
 	private SensorManager sensorManager;
-	private int iSensorWorkMode = SensorManager.SENSOR_DELAY_GAME;
+	private int iSensorWorkMode;
+	private Set<Integer> cAvailableSensors;
+	private Context oContext;
 	/*
 	 * Integer jest id sensora z enuma np Sensor.TYPE_ACCELEROMETER
 	 * 	Wartosci mapy jest para:
@@ -35,15 +42,37 @@ public class OurSensorManager2 implements SensorEventListener{
 	 * zalezy od wartosci limitera z obiektu cSensorList
 	 */
 	private Map<Integer,Queue<Float[]>> cSensorLastValues;
-
+	/**
+	 * Podstawowy konstruktor. Ustawia tryb czulosci sensorow na wartosc 
+	 * domyslna.
+	 * 
+	 * @param context context z klasy activity
+	 */
 	public OurSensorManager2(Context context) {
-		startMe(context);
+		this(context, SensorManager.SENSOR_DELAY_GAME);
+	}
+	/**
+	 * Konstrukto umozliwiajacy dodatkowo ustawienia w jakim trybie
+	 * czulosci powinny dzialac sensory
+	 * 
+	 * @param context context z klasy activity
+	 * @param iSensorWorkMode wartosc z klasy SensorManager np. SensorManager.SENSOR_DELAY_GAME
+	 */
+	public OurSensorManager2(Context context,int iSensorWorkMode) {
+		this.iSensorWorkMode = iSensorWorkMode;
+		this.oContext = context;
+		startMe();
 	}
 	
-	private void startMe(Context context){
-		sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+	private void startMe(){
+		this.sensorManager = (SensorManager)this.oContext.getSystemService(Context.SENSOR_SERVICE);
 		this.cSensorList = new HashMap<Integer,Pair<Sensor,Pair<Integer,Integer>>>();
 		this.cSensorLastValues = new HashMap<Integer, Queue<Float[]>>();
+		this.cAvailableSensors = new HashSet<Integer>();
+		
+		for(Sensor sSingelSensor : this.sensorManager.getSensorList(Sensor.TYPE_ALL)){
+			this.cAvailableSensors.add(sSingelSensor.getType());
+		}
 	}
 	/**
 	 * Dodaj obsluge wybranego sensora
@@ -53,20 +82,19 @@ public class OurSensorManager2 implements SensorEventListener{
 	 * @param iPrecision - liczba miejsc po przecinku dla rezultatow
 	 */
 	public void addSensor(Integer iSensorId, Integer iNumberOfResultsForMedian,int iPrecision){
-		/*
-		 * Dodac jakies sprawdzanie, czy na danym urzadzeniu w ogole dany sensor istnieje
-		 * 
-		 * Pytanie, co zrobic jak nie istnieje? propozycja jest wywalenie jakiegos wyjatku
-		 * po czym wyswietlenie info, ze na tym urzadzeniu nie pograsz sobie w ta gierke
-		 */
-		Sensor oSensor = sensorManager.getDefaultSensor(iSensorId);
-		//rejestracja dangeo sensora
-		sensorManager.registerListener(this, oSensor, iSensorWorkMode);
-		//utworzenie pary limiterow (limit liczby ostatnich wynikow, precyzje przechowywanych wynikow)
-		Pair<Integer,Integer> oPairLimiters = new Pair<Integer,Integer>(iNumberOfResultsForMedian,iPrecision);
-		//id sensora i jego limitery
-		Pair<Sensor,Pair<Integer,Integer>> oSingelSensor = new Pair<Sensor,Pair<Integer,Integer>>(oSensor, oPairLimiters);
-		cSensorList.put(iSensorId, oSingelSensor);
+		if(this.cAvailableSensors.contains(iSensorId)){
+			Sensor oSensor = sensorManager.getDefaultSensor(iSensorId);
+			//rejestracja dangeo sensora
+			sensorManager.registerListener(this, oSensor, iSensorWorkMode);
+			//utworzenie pary limiterow (limit liczby ostatnich wynikow, precyzje przechowywanych wynikow)
+			Pair<Integer,Integer> oPairLimiters = new Pair<Integer,Integer>(iNumberOfResultsForMedian,iPrecision);
+			//id sensora i jego limitery
+			Pair<Sensor,Pair<Integer,Integer>> oSingelSensor = new Pair<Sensor,Pair<Integer,Integer>>(oSensor, oPairLimiters);
+			cSensorList.put(iSensorId, oSingelSensor);
+		}else{
+			SettingsPopUp oTmp = new SettingsPopUp(this.oContext);
+			oTmp.showSimplePopup(POPUP_TITLE, POPUP_TITLE);
+		}
 	}
 	/**
 	 * Zwraca tablice rezultatow dla danego sensora
@@ -128,6 +156,10 @@ public class OurSensorManager2 implements SensorEventListener{
 				sensorManager.registerListener(this, oSingeSensorWithLimiters.first, iSensorWorkMode);
 			}
 		}
+	}	
+	
+	public void onDestroy() {
+	    this.onPause();
 	}	
 	
 	//gettery	

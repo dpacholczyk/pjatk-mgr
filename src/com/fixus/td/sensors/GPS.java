@@ -112,7 +112,7 @@ public class GPS extends Service implements LocationListener {
 
 	public void showSettingsPopUp() {
 		SettingsPopUp tmp = new SettingsPopUp(mContext);
-		tmp.showPopUp(POP_TITLE, POP_MSG,
+		tmp.showPopUpWithSettingsMenu(POP_TITLE, POP_MSG,
 				Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 	}
 

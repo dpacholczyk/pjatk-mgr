@@ -395,7 +395,8 @@ public class RadarActivity extends AndroidHarness {
     public void onResume() {
 		super.onResume();    	
     	this.stopPreview = false;
-
+    	
+    	sensorManager.onResume();
 		this.mCamera = this.cTools.getCameraInstance();
 		this.mCamera = this.cTools.initializeCameraParameters(this.mCamera);
 		this.preparePreviewCallbackBuffer();
@@ -481,6 +482,7 @@ public class RadarActivity extends AndroidHarness {
 	@Override
 	protected void onPause() {
 		this.stopPreview = true;
+		sensorManager.onPause();
 		super.onPause();		
 		if(this.mCamera != null) {
 			this.mCamera.setPreviewCallback(null);
@@ -494,8 +496,11 @@ public class RadarActivity extends AndroidHarness {
 
 	@Override
 	protected void onDestroy() {
-		this.stopPreview = true;
 		super.onDestroy();
+		this.stopPreview = true;
+		
+		sensorManager.onDestroy();
+		
 		if(this.mCamera != null) {
 			this.mCamera.setPreviewCallback(null);
 			this.mCamera.release();
