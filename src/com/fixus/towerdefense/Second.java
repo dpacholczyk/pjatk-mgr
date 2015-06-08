@@ -10,8 +10,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-import com.fixus.towerdefense.tools.PhonePosition;
-
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -39,13 +37,12 @@ public class Second extends Activity {
 		if(actionBar != null){
 			actionBar.hide();
 		}
-		
-		
+				
 		setContentView(R.layout.activity_second);
 		currentRange = (TextView) findViewById(R.id.currentRange);
 		numberOfPoints = (TextView) findViewById(R.id.pointView2);
 		setRangeBar(R.id.rangeBarr,currentRange,"Current range: %d/%d  km");
-		setRangeBar(R.id.pointBar,numberOfPoints,"Number of points: %d/%d");		
+		setRangeBar(R.id.pointBar,numberOfPoints,"Number of points: %d/%d");
 	}
 	
 	public void startGame(View view) {
