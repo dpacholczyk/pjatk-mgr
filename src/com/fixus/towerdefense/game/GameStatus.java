@@ -103,6 +103,9 @@ public class GameStatus {
 		boolean bResult = true;
 		
 		Pair<Location, LocationType> oPair;
+		if(RANDOM_POINTS_ON_MAP.size() == 0){
+			return false;
+		}
 		for(Entry<String, Pair<Location, LocationType>> oEntry : RANDOM_POINTS_ON_MAP.entrySet()){
 			oPair = oEntry.getValue();
 			if(oPair.second != LocationType.FOUND){
