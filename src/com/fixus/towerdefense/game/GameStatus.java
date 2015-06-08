@@ -99,4 +99,18 @@ public class GameStatus {
 		}
 	}
 	
+	public static boolean isGameOver() {
+		boolean bResult = true;
+		
+		Pair<Location, LocationType> oPair;
+		for(Entry<String, Pair<Location, LocationType>> oEntry : RANDOM_POINTS_ON_MAP.entrySet()){
+			oPair = oEntry.getValue();
+			if(oPair.second != LocationType.FOUND){
+				bResult = false;
+				break;
+			}
+		}
+		return bResult;
+	}
+	
 }
