@@ -1,5 +1,6 @@
 package com.fixus.td.popup;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,11 +39,33 @@ public class SettingsPopUp {
 
 		alertDialog.show();
 	}
+	
 	public void showSimplePopup(String title,String message) {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
-		
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);		
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
+		
+		alertDialog.show();
+	}
+	
+	public void showPopupWithExitButton(String title,String message,final Activity oCurrentActivity) {
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);	
+		alertDialog.setTitle(title);
+		alertDialog.setMessage(message);
+		
+		alertDialog.setPositiveButton("Exit game",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						oCurrentActivity.finish();
+				        System.exit(0);
+					}
+				});
+		alertDialog.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
 		
 		alertDialog.show();
 	}

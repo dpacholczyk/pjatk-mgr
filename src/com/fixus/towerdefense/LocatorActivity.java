@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
 
+import com.fixus.td.popup.SettingsPopUp;
 import com.fixus.td.sensors.GPS;
 import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.game.LocationType;
@@ -42,6 +43,10 @@ public class LocatorActivity extends FragmentActivity {
         if(!this.gps.canGetLocation()){
 	    	this.gps.showSettingsPopUp();
 	    }
+        if(GameStatus.isGameOver()){
+        	SettingsPopUp oTmp = new SettingsPopUp(this);
+        	oTmp.showPopupWithExitButton("Game is over", "Congratulation!",this);
+        }
         this.setupMap();
     }
  

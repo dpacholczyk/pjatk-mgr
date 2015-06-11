@@ -1,3 +1,4 @@
+
 package com.fixus.towerdefense;
 
 import android.annotation.SuppressLint;
@@ -16,7 +17,7 @@ import android.widget.TextView;
  *
  * @see SystemUiHider
  */
-public class SecondActivity extends Activity {
+public class Second extends Activity {
 	public final static String RANGE = "com.example.interfejss.RANGE";
 	public final static String POINTS = "com.example.interfejss.POINTS";
 	private TextView currentRange;
