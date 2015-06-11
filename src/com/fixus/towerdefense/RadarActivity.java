@@ -61,7 +61,6 @@ public class RadarActivity extends AndroidHarness {
 	private float lastFullAzimuth = 0f;
 	private float lastFullRoll = 0f;
 	private ImageView compassNeedle;
-	private int posX = 0;
 	
 	private KalmanLatLong oSmoothGPS;
 	
@@ -109,7 +108,6 @@ public class RadarActivity extends AndroidHarness {
 				);
 
 				azimuthInDegress = Compas.getAzimuthInDegress(azimut, getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-//				azimuthInDegress2 = Compas.getAzimuthInDegress(azimut,  false);
 				azimuthInDegress2 = azimuthInDegress;
 				//tu ustawiamy nasza lokazliazacje
 				Location fromLocation = new Location("");
@@ -123,18 +121,7 @@ public class RadarActivity extends AndroidHarness {
 					fromLocation.setLongitude(oSmoothGPS.getLongitude());
 					azimuthText.setText("1)" + gpsLocation.getLatitude() + " " + gpsLocation.getLongitude()+
 									  "\n2)" + oSmoothGPS.getLatitude()       + " " + oSmoothGPS.getLongitude());
-				}else{
-					
-					//52.133340, 20.666227
-//					fromLocation.setLatitude(52.107995);
-//					fromLocation.setLongitude(21.042950);
-//					oSmoothGPS.Process(fromLocation.getLatitude(), fromLocation.getLongitude(), 
-//					gpsLocation.getAccuracy(), System.currentTimeMillis());
-//					fromLocation = new Location("");
-//					fromLocation.setLatitude(oSmoothGPS.getLatitude());
-//					fromLocation.setLongitude(oSmoothGPS.getLongitude());
-				}
-				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
+				}				float[] tmpMatrix = sensorManager.getLastMatrix(Sensor.TYPE_ACCELEROMETER);
 				
 				/**
 				 * @TODO
@@ -164,10 +151,6 @@ public class RadarActivity extends AndroidHarness {
 					if(blockShow) {
 						show = false;
 					}
-//					if(!object.inDistance(distance)) {
-//						show = false;
-//					}
-					Log.d("POSITION_S", "show: " + show + " | " + blockShow);
 					if(frameLimiter >= azimuthLimiter) {
 						if(show && (com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							if(newMove) {
@@ -189,11 +172,8 @@ public class RadarActivity extends AndroidHarness {
 							}
 							Log.d("POSITION_P", show + " | " + newObjectPosition);
 							if(!newMove) {
-//								((com.fixus.towerdefense.model.SuperimposeJME) app).moveByPart(partPos, add);
 								((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(newObjectPosition);
 							}
-
-							//							((com.fixus.towerdefense.model.SuperimposeJME) app).move(newObjectPosition/offset, -2.5f, 0.0f);
 						}
 						if((com.fixus.towerdefense.model.SuperimposeJME) app != null) {
 							((com.fixus.towerdefense.model.SuperimposeJME) app).toogleObject(show);
@@ -201,7 +181,6 @@ public class RadarActivity extends AndroidHarness {
 					}
 					newMoveCounter++;
 					if(newMoveCounter > frameOffset) {
-						Log.d("ANIM", "reset na " + newMoveCounter);
 						newMove = true;
 						newMoveCounter = 0;
 					}
@@ -241,9 +220,7 @@ public class RadarActivity extends AndroidHarness {
 							 * należy uwzględnić znak, aby rotacja mogła odbyć się w obu kierunkach
 							 */
 							float currentRollRotation = tmpMatrix[2] - RadarActivity.this.lastFullRoll;
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(currentRollRotation, azimuthInDegress-lastFullAzimuth, 0f);
 							((com.fixus.towerdefense.model.SuperimposeJME) app).rotate(0f, azimuthInDegress-lastFullAzimuth, 0f);
-//							((com.fixus.towerdefense.model.SuperimposeJME) app).rotateCamera(currentRollRotation, 0f, 0f);
 						}
 					}
 					lastAzimuth = (int)azimuthInDegress;
@@ -315,22 +292,14 @@ public class RadarActivity extends AndroidHarness {
 		if(STATIC_THIS == null){
 			STATIC_THIS = this;
 		}
-		// Set the application class to run
-		// appClass = "mygame.Main";
+
 		appClass = "com.fixus.towerdefense.model.SuperimposeJME";
-		// Try ConfigType.FASTEST; or ConfigType.LEGACY if you have problems
 		eglConfigType = ConfigType.BEST;
-//		eglConfigType = ConfigType.FASTEST;
-		
-		// Exit Dialog title & message
 		exitDialogTitle = "Wyjść?";
 		exitDialogMessage = "Naciśnik TAK";
-		// Enable verbose logging
 		eglConfigVerboseLogging = false;
-		// Choose screen orientation
 		screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 		mouseEventsInvertX = true;
-		// Invert the MouseEvents Y (default = true)
 		mouseEventsInvertY = true;
 		TextureUtil.ENABLE_COMPRESSION = false;
 	}
@@ -342,11 +311,11 @@ public class RadarActivity extends AndroidHarness {
 		super.onCreate(savedInstanceState);		
 		//obieranie intencji - obecnie bez zadnych ustawien
   		Intent intent = getIntent();
-  		if(intent.hasExtra(Second.RANGE)) {
-  	  		GameStatus.radius = (double)intent.getIntExtra(Second.RANGE, 2);
+  		if(intent.hasExtra(SecondActivity.RANGE)) {
+  	  		GameStatus.radius = (double)intent.getIntExtra(SecondActivity.RANGE, 2);
   		}
-  		if(intent.hasExtra(Second.POINTS)) {
-  	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(Second.POINTS, 0));
+  		if(intent.hasExtra(SecondActivity.POINTS)) {
+  	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(SecondActivity.POINTS, 0));
   		}
   		if(intent.hasExtra("selectedLat")) {
   			/*
@@ -354,16 +323,8 @@ public class RadarActivity extends AndroidHarness {
   			 */
   			double tmpLat = intent.getDoubleExtra(LocatorActivity.INTENT_LAT_ID, 0);
   			double tmpLng = intent.getDoubleExtra(LocatorActivity.INTENT_LONG_ID, 0);
-  			//this.selectedPosition = new LatLng(tmpLat, tmpLng);
   			this.targetLocation.setLatitude(tmpLat);
   			this.targetLocation.setLongitude(tmpLng);
-  			Log.d("SEEN", "ustawiam target");
-  			//altanka
-//  			this.targetLocation.setLatitude(52.107824);
-//  			this.targetLocation.setLongitude(21.042722);
-  			// 180 stopni względem altanki
-//  			this.targetLocation.setLatitude(52.108119);
-//  			this.targetLocation.setLongitude(21.043186);
   			blockShow = false;
   		}
 		this.cTools = new CameraTool();
@@ -404,33 +365,14 @@ public class RadarActivity extends AndroidHarness {
 		if (mCamera == null) {
 			Log.e(TAG, "Camera not available");
 		} else {
-			// Create our Preview view and set it as the content of our
-			// activity.
 			this.mPreview = new CameraPreview(this, mCamera, mCameraCallback);
-			// We do not want to display the Camera Preview view at startup - so
-			// we resize it to 1x1 pixel.
-//			ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
-//			addContentView(this.mPreview, lp);			
-			
 			if(compassNeedle == null){
 				compassNeedle = new ImageView(this);
 				compassNeedle.setImageResource(R.drawable.compass_needle1);
 			    addContentView(compassNeedle, new ViewGroup.LayoutParams(300, 500));
-			    
-			    /**
-			     * @TODO
-			     * przywrócenie tego
-			     */
-//				ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(1, 1);
-//				addContentView(this.mPreview, lp);			
 			}
 			
-			/**
-			 * @TODO
-			 * wyciecie tekstu
-			 */
 			azimuthText = new TextView(this);
-//			addContentView(azimuthText, new ViewGroup.LayoutParams(900, 600));
 			posButton = new Button(this);
 			posButton.setText("pos -1");
 			posButton.setOnClickListener(new OnClickListener() {
@@ -443,11 +385,7 @@ public class RadarActivity extends AndroidHarness {
 					} else {
 						lowerX = 2f;
 					}
-					Log.d("MOTION", "x: " + lowerX + " | " + random);
-//					Log.d("LOWER", lowerX + "");
-//					((com.fixus.towerdefense.model.SuperimposeJME) app).move(1, -2.5f, 0);
-					((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(lowerX);
-					
+					((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(lowerX);					
 				}
 			});
 			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));

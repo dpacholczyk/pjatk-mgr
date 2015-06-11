@@ -3,9 +3,9 @@ package com.fixus.towerdefense.tools;
 import android.location.Location;
 
 public abstract class Position {
-	private double latitude;
-	private double longitude;
-	private double altitude;
+	protected double latitude;
+	protected double longitude;
+	protected double altitude;
 	
 	public Position() {
 		

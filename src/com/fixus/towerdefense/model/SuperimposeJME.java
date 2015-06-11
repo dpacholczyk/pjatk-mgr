@@ -245,6 +245,10 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 	private boolean gpsMove = false;
 	public static int mode;
 	
+	MotionPath path = new MotionPath();
+	MotionEvent motionControl;
+	float newXAnimation = 0.0f;
+	
 	public void rotate(float x, float y, float z) {
 		newX = x;
 		newY = y;
@@ -259,7 +263,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		
 		rotationMove = true;
 	}
-	
+		
 	public void moveByPart(float x, boolean add) {
 		if(ninja != null) {
 			Vector3f currentTranslation = ninja.getLocalTranslation();
@@ -301,18 +305,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		}
 	}
 	
-	MotionPath path = new MotionPath();
-	MotionEvent motionControl;
-	float newXAnimation = 0.0f;
 	public void startCinematic(float x) {
-		Log.d("MOTION", "Rozpoczynam motion");	
-//		path = new MotionPath();
 		if(ninja != null) {
 			Vector3f currentTranslation = ninja.getLocalTranslation();
-			Log.d("MOTION", "OLD: " + currentTranslation.x);
-			Log.d("MOTION", "NEW: " + x);
-			Log.d("MOTION", "-------------------");
-			Log.d("TEST_GPS", "cinematic: " + (mNinjaPosition.z) * -1);
 			newXAnimation = x;
 			path = new MotionPath();
 			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
@@ -345,11 +340,80 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		}
 	}
 	
+	public void startCinematic(float x, float initialDuration, float speed) {
+		if(ninja != null) {
+			Vector3f currentTranslation = ninja.getLocalTranslation();
+			newXAnimation = x;
+			path = new MotionPath();
+			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
+			path.addWayPoint(new Vector3f(x, -2.5f, 0));
+			
+			motionControl = new MotionEvent(ninja, path);
+			motionControl.setDirectionType(MotionEvent.Direction.PathAndRotation);
+	        motionControl.setRotation(new Quaternion().fromAngleNormalAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y));
+	        motionControl.setInitialDuration(initialDuration);
+	        motionControl.setSpeed(speed);    
+	        
+	        path.addListener(new MotionPathListener() {
+
+	            public void onWayPointReach(MotionEvent control, int wayPointIndex) {
+	                if (path.getNbWayPoints() == wayPointIndex + 1) {
+	                    Log.d("MOTION", control.getSpatial().getName() + "Finished!!! ");
+	                    try {
+		                    path.removeWayPoint(wayPointIndex);
+	                    } catch(ArrayIndexOutOfBoundsException ex) {
+	                    	Log.d("MOTION", ex.getMessage());
+	                    }
+	            		moveX(newXAnimation);
+	                } else {
+	                    Log.d("MOTION", control.getSpatial().getName() + " Reached way point " + wayPointIndex);
+	                }
+	            }
+	        });
+	        
+	        motionControl.play();
+		}
+	}
+	
 	public void moveX(float x) {
 		mX = x;
 		
 		rotationMove = true;
 	}
+	
+	public void moveOneAxis(float value, String axis) {
+		if(axis.equals("X")) {
+			moveOnlyX(value);
+		} else if(axis.equals("Y")) {
+			moveOnlyY(value);
+		} else if(axis.equals("Z")) {
+			moveOnlyZ(value);
+		}
+		
+		rotationMove = true;
+	}
+	
+	public void moveOnlyX(float x) {
+		Vector3f currentTranslation = ninja.getLocalTranslation();
+		mX = x;
+		mY = currentTranslation.y;
+		mZ = currentTranslation.z;
+	}
+	
+	public void moveOnlyY(float y) {
+		Vector3f currentTranslation = ninja.getLocalTranslation();
+		mX = currentTranslation.x;
+		mY = y;
+		mZ = currentTranslation.z;
+	}
+	
+	public void moveOnlyZ(float z) {
+		Vector3f currentTranslation = ninja.getLocalTranslation();
+		mX = currentTranslation.x;
+		mY = currentTranslation.y;
+		mZ = z;
+	}
+
 	
 	public void rotateCamera(float x, float y, float z) {
 		ninja.rotate(x, y, z);
@@ -457,13 +521,9 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		ECEFtoENU(locationNinja,mUserPosition,ECEFNinja,ENUNinja);
 		//x=east,y=north,z=up
 		mNinjaPosition.set(ENUNinja.x,0,ENUNinja.y);
-		Log.d("GPS","Ninja Pos="+mNinjaPosition.toString());
-		Log.d("GPS", "Dystans do: " + location.distanceTo(locationNinja));
 		
 		gpsMove = true;
 		mode = 1;
-		
-		Log.d("GPS", "setUserLocation");
 		
 		return mNinjaPosition.toString();
 	}
@@ -490,12 +550,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 				newX = this.oldX - mNinjaPosition.x;
 			}
 			this.oldX = mNinjaPosition.x;
-			Log.d("TEST_GPS", "" + (mNinjaPosition.z) * -1);
-//			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
-			ninja.setLocalTranslation(mX, -2.5f, 0);
-//			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f,(mNinjaPosition.z) * -1);
-//			ninja.setLocalTranslation(mNinjaPosition.x, -2.5f, 0);
-//			ninja.setLocalTranslation(mX, mY, mZ);
+			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+
 			if(gpsMove) {
 				gpsMove = false;
 			}

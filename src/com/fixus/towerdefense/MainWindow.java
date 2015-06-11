@@ -32,7 +32,7 @@ public class MainWindow extends Activity {
 	}
 	
 	public void startAction(View view) {
-		Intent intent = new Intent(this, Second.class);
+		Intent intent = new Intent(this, SecondActivity.class);
 	    //intent.putExtra(EXTRA_MESSAGE, "wiadomosc ;)");
 	    startActivity(intent);
 	}

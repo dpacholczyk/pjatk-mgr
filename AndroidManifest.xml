@@ -69,6 +69,12 @@
             android:label="@string/title_activity_second"
             android:theme="@style/FullscreenTheme" >
         </activity>
+        <activity
+            android:name=".OptionActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_second"
+            android:theme="@style/FullscreenTheme" >
+        </activity>
     </application>
 
 </manifest>
