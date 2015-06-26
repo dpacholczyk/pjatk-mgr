@@ -136,7 +136,12 @@ public class RadarActivity extends AndroidHarness {
 						phone.calibration(RadarActivity.this.rollAvg);						
 						GameStatus.phone = phone;
 					}
-				}				
+				}	
+				
+//				targetLocation.setLatitude(52.107848);
+//				targetLocation.setLongitude(21.042766);
+				
+				
 			    //a to ustawi odpowiednio strzalke
 //				if(RadarActivity.this.selectedPosition != null) {
 					drawCompassToPoint(fromLocation, targetLocation);

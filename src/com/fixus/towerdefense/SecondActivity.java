@@ -46,7 +46,8 @@ public class SecondActivity extends Activity {
 	}
 	
 	public void startGame(View view) {
-		Intent intent = new Intent(this, RadarActivity.class);
+//		Intent intent = new Intent(this, RadarActivity.class);
+		Intent intent = new Intent(this, LocatorActivity.class);
 	    intent.putExtra(RANGE, getBarProgres(R.id.rangeBarr));
 	    intent.putExtra(POINTS, getBarProgres(R.id.pointBar));
 	    startActivity(intent);

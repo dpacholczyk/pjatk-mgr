@@ -39,6 +39,14 @@ public class LocatorActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_locator);
+        Intent intent = getIntent();
+  		if(intent.hasExtra(SecondActivity.RANGE)) {
+  	  		GameStatus.radius = (double)intent.getIntExtra(SecondActivity.RANGE, 2);
+  		}
+  		if(intent.hasExtra(SecondActivity.POINTS)) {
+  	  		GameStatus.setNUMBER_OF_POINTS_TO_FIND(intent.getIntExtra(SecondActivity.POINTS, 0));
+  		}
+
         this.gps = new GPS(this);
         if(!this.gps.canGetLocation()){
 	    	this.gps.showSettingsPopUp();

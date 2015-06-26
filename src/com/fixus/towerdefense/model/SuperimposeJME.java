@@ -13,6 +13,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.fixus.towerdefense.RadarActivity;
+import com.fixus.towerdefense.library.configuration.Configuration;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.AnimEventListener;
@@ -203,7 +204,7 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 		rootNode.detachAllChildren();
 		// Load a model from test_data (OgreXML + material + texture)
 //        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml");
-        ninja = assetManager.loadModel("Models/planet.obj");
+        ninja = assetManager.loadModel(Configuration.modelPath);
         
 //        ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.j3o");
         ninja.scale(0.025f, 0.025f, 0.025f);
@@ -211,15 +212,15 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
       Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"); // default material
 //        Material mat = assetManager.loadMaterial("Materials/Ninja/Ninja.j3m");
 //        mat.setTexture("ColorMap", assetManager.loadTexture("Textures/Ninja/Ninja.jpg"));
-      mat.setTexture("ColorMap", assetManager.loadTexture("Textures/planet.jpg"));
+      mat.setTexture("ColorMap", assetManager.loadTexture(Configuration.texturePath));
       
         ninja.setMaterial(mat);               
         
         // Math.toRadians przelicza kąt na radiany które podawane są do metody w celu rotacji.
         // rotacja odbywa się tak, że 0 to znaczy skierowane na wprost zgodnie z tym jak sie patrzy przez kamere
         // obrot np. 90 stopni oznacza obrot w lewo
-        ninja.rotate(0.0f, (float)Math.toRadians(0.0), 0.0f);
-        ninja.setLocalTranslation(0.0f, -2.5f, 0);
+        ninja.rotate(0.5f, (float)Math.toRadians(0.0), 0.0f);
+        ninja.setLocalTranslation(0.0f, -2.5f, -35.0f);
         
         rootNode.attachChild(ninja);
         
@@ -310,8 +311,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			Vector3f currentTranslation = ninja.getLocalTranslation();
 			newXAnimation = x;
 			path = new MotionPath();
-			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
-			path.addWayPoint(new Vector3f(x, -2.5f, 0));
+			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, currentTranslation.z));
+			path.addWayPoint(new Vector3f(x, -2.5f, currentTranslation.z));
 			
 			motionControl = new MotionEvent(ninja, path);
 			motionControl.setDirectionType(MotionEvent.Direction.PathAndRotation);
@@ -535,10 +536,10 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			mvideoBGMat.setTexture("ColorMap", mCameraTexture);
 		}
 
-		if(newPosition && ninja != null) {
-			ninja.rotate((float)Math.toRadians(newX), (float)Math.toRadians(newY), (float)Math.toRadians(newZ));
-			newPosition = false;
-		}
+//		if(newPosition && ninja != null) {
+//			ninja.rotate((float)Math.toRadians(newX), (float)Math.toRadians(newY), (float)Math.toRadians(newZ));
+//			newPosition = false;
+//		}
 
 		if((rotationMove && ninja != null) || (gpsMove && ninja != null)) {
 			float newX = 0f;
@@ -550,7 +551,8 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 				newX = this.oldX - mNinjaPosition.x;
 			}
 			this.oldX = mNinjaPosition.x;
-			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -1);
+			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -3);
+//			ninja.setLocalTranslation(mX, -2.5f, -35.0f);
 
 			if(gpsMove) {
 				gpsMove = false;

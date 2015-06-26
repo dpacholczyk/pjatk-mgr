@@ -50,7 +50,8 @@
         <activity
             android:name=".LocatorActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:screenOrientation="landscape" >
         </activity>
         <activity
             android:name=".MainWindow"
@@ -65,6 +66,12 @@
         </activity>
         <activity
             android:name=".Second"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_second"
+            android:theme="@style/FullscreenTheme" >
+        </activity>
+        <activity
+            android:name=".SecondActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_second"
             android:theme="@style/FullscreenTheme" >
