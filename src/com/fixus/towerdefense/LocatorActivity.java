@@ -144,9 +144,13 @@ public class LocatorActivity extends FragmentActivity {
 	}
 	
 	private void addRandomPoints(int pointsCount) {
-		for(int i = 0; i < pointsCount; i++) {
+		for(int i = 0; i < pointsCount; ++i) {
 			Location randomPoint = MapPoint.getLocation(this.gps.getLocation(), GameStatus.getRadiusInMeters());
-
+			if(i==0){
+				//PJATK 52.223636, 20.994361
+				randomPoint.setLatitude(52.223636);
+				randomPoint.setLongitude(20.994361);
+			}
 			String sUniqeId = getUniqueId(randomPoint.getLatitude(),randomPoint.getLongitude());
 			GameStatus.addLocation(randomPoint, sUniqeId ,LocationType.NOT_FOUND);
 			this.googleMap.addMarker(
