@@ -379,18 +379,15 @@ public class RadarActivity extends AndroidHarness {
 			
 			azimuthText = new TextView(this);
 			posButton = new Button(this);
-			posButton.setText("pos -1");
+			posButton.setText("Toggle distance");
 			posButton.setOnClickListener(new OnClickListener() {
 				
 				public void onClick(View v) {
-					Random generator = new Random();
-					int random = generator.nextInt(2);
-					if(random == 0) {
-						lowerX = 2f * -1;
+					if(GameStatus.useDistance) {
+						GameStatus.useDistance = false;
 					} else {
-						lowerX = 2f;
+						GameStatus.useDistance = true;
 					}
-					((com.fixus.towerdefense.model.SuperimposeJME) app).startCinematic(lowerX);					
 				}
 			});
 			addContentView(posButton, new ViewGroup.LayoutParams(100, 100));

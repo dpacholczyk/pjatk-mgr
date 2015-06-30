@@ -39,6 +39,8 @@ public class GameStatus {
 	
 	public static ObjectPosition currentPositon = null;
 	
+	public static boolean useDistance = false;
+	
 	public static int getRadiusInMeters() {
 		//Log.d(TAG, "radius: " + radius);
 		return (int)radius * 1000;

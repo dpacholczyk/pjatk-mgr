@@ -13,6 +13,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.fixus.towerdefense.RadarActivity;
+import com.fixus.towerdefense.game.GameStatus;
 import com.fixus.towerdefense.library.configuration.Configuration;
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
@@ -551,8 +552,11 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 				newX = this.oldX - mNinjaPosition.x;
 			}
 			this.oldX = mNinjaPosition.x;
-			ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -3);
-//			ninja.setLocalTranslation(mX, -2.5f, -35.0f);
+			if(GameStatus.useDistance) {
+				ninja.setLocalTranslation(mX, -2.5f,(mNinjaPosition.z) * -3);
+			} else {
+				ninja.setLocalTranslation(mX, -2.5f, -35.0f);
+			}
 
 			if(gpsMove) {
 				gpsMove = false;
