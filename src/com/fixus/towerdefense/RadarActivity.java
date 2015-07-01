@@ -138,8 +138,8 @@ public class RadarActivity extends AndroidHarness {
 					}
 				}	
 				
-//				targetLocation.setLatitude(52.107848);
-//				targetLocation.setLongitude(21.042766);
+				targetLocation.setLatitude(52.107848);
+				targetLocation.setLongitude(21.042766);
 				
 				
 			    //a to ustawi odpowiednio strzalke
@@ -379,7 +379,7 @@ public class RadarActivity extends AndroidHarness {
 			
 			azimuthText = new TextView(this);
 			posButton = new Button(this);
-			posButton.setText("Toggle distance");
+			posButton.setText("Toggle distance: " + GameStatus.useDistance);
 			posButton.setOnClickListener(new OnClickListener() {
 				
 				public void onClick(View v) {

@@ -347,8 +347,13 @@ public class SuperimposeJME extends SimpleApplication  implements AnimEventListe
 			Vector3f currentTranslation = ninja.getLocalTranslation();
 			newXAnimation = x;
 			path = new MotionPath();
-			path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
-			path.addWayPoint(new Vector3f(x, -2.5f, 0));
+			if(GameStatus.useDistance) {
+				path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, (mNinjaPosition.z) * -3));
+				path.addWayPoint(new Vector3f(x, -2.5f, (mNinjaPosition.z) * -3));
+			} else {
+				path.addWayPoint(new Vector3f(currentTranslation.x, -2.5f, 0));
+				path.addWayPoint(new Vector3f(x, -2.5f, 0));
+			}
 			
 			motionControl = new MotionEvent(ninja, path);
 			motionControl.setDirectionType(MotionEvent.Direction.PathAndRotation);
