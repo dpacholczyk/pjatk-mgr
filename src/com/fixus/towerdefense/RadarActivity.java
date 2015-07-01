@@ -138,8 +138,8 @@ public class RadarActivity extends AndroidHarness {
 					}
 				}	
 				
-				targetLocation.setLatitude(52.107848);
-				targetLocation.setLongitude(21.042766);
+//				targetLocation.setLatitude(52.107848);
+//				targetLocation.setLongitude(21.042766);
 				
 				
 			    //a to ustawi odpowiednio strzalke
